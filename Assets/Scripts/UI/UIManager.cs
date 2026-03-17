@@ -96,9 +96,10 @@ public class UIManager : MonoBehaviour
     private void RefreshScoreTexts(int score, int best)
     {
         _scoreTMP.text = score.ToString();
-        _bestTMP.text  = best.ToString();
+        _bestTMP.text = best.ToString();
 
         DOTween.Kill(_scoreTMP.rectTransform);
+        _scoreTMP.rectTransform.localScale = Vector3.one; // ⬅️ Sıfırla!
         _scoreTMP.rectTransform
             .DOPunchScale(Vector3.one * 0.20f, 0.28f, 2, 0.5f)
             .SetEase(Ease.OutQuad);

@@ -8,14 +8,6 @@ using UnityEngine;
 /// Each shape is stored in ALL of its distinct orientations as separate entries
 /// so no runtime rotation is needed (matching 1010!/Block Puzzle gameplay).
 ///
-/// This version contains only the shapes requested:
-/// - 2×2 square (4'lü küp)
-/// - 3×3 square (9'lu küp)
-/// - L shapes with 3, 4, 5 cells
-/// - I shapes with 2, 3, 4, 5, 6 cells
-/// - T shape (4 cells)
-/// - Z shape (4 cells)
-///
 /// Shape coordinate system: col=x (right), row=y (up), origin at min corner.
 /// </summary>
 public static class BlockDefinitions
@@ -40,117 +32,116 @@ public static class BlockDefinitions
     //  Columns go →  /  Rows go ↑  (row 0 = bottom)
     // =========================================================================
 
-    private static readonly Vector2Int[][] AllShapes =
+    public static readonly Vector2Int[][] AllShapes =
     {
+        //──────────────────────────────────────────────────────────────────────
+        // 2-CELL LINES (I)
+        //──────────────────────────────────────────────────────────────────────
+        /*  0 */  S(V(0,0), V(0,1)),                               // vertical domino
+        /*  1 */  S(V(0,0), V(1,0)),                               // horizontal domino
+
+        //──────────────────────────────────────────────────────────────────────
+        // 3-CELL LINES (I)
+        //──────────────────────────────────────────────────────────────────────
+        /*  2 */  S(V(0,0), V(0,1), V(0,2)),                       // │││
+        /*  3 */  S(V(0,0), V(1,0), V(2,0)),                       // ───
+
+        //──────────────────────────────────────────────────────────────────────
+        // 4-CELL LINES (I)
+        //──────────────────────────────────────────────────────────────────────
+        /*  4 */  S(V(0,0), V(0,1), V(0,2), V(0,3)),               // ││││
+        /*  5 */  S(V(0,0), V(1,0), V(2,0), V(3,0)),               // ────
+
+        //──────────────────────────────────────────────────────────────────────
+        // 5-CELL LINES (I)
+        //──────────────────────────────────────────────────────────────────────
+        /*  6 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(0,4)),       // │││││
+        /*  7 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(4,0)),       // ─────
+
         //──────────────────────────────────────────────────────────────────────
         // 2×2 SQUARE (4'lü küp)
         //──────────────────────────────────────────────────────────────────────
-        /* 0 */  S(V(0,0), V(1,0), V(0,1), V(1,1)),                 // XX / XX
+        /*  8 */  S(V(0,0), V(1,0), V(0,1), V(1,1)),               // XX / XX
 
         //──────────────────────────────────────────────────────────────────────
         // 3×3 SQUARE (9'lu küp)
         //──────────────────────────────────────────────────────────────────────
-        /* 1 */  S(V(0,0), V(1,0), V(2,0),
-                   V(0,1), V(1,1), V(2,1),
-                   V(0,2), V(1,2), V(2,2)),
+        /*  9 */  S(V(0,0), V(1,0), V(2,0),
+                    V(0,1), V(1,1), V(2,1),
+                    V(0,2), V(1,2), V(2,2)),                       // full 3x3 block
 
         //──────────────────────────────────────────────────────────────────────
-        // 3-CELL L-SHAPES (3'lü "L") – 4 rotations
+        // SMALL L-SHAPES (3'lü "L", 4 rotations)
+        //  rot0: XX    rot1: X.    rot2: .X    rot3: XX
+        //        X.          XX          .X          .X
         //──────────────────────────────────────────────────────────────────────
-        /* 2 */  S(V(0,0), V(0,1), V(1,1)),   // ┘
-        /* 3 */  S(V(0,0), V(1,0), V(0,1)),   // └
-        /* 4 */  S(V(1,0), V(0,1), V(1,1)),   // ┌
-        /* 5 */  S(V(0,0), V(1,0), V(1,1)),   // ┐
+        /* 10 */  S(V(0,0), V(0,1), V(1,1)),   // ┘
+        /* 11 */  S(V(0,0), V(1,0), V(0,1)),   // └
+        /* 12 */  S(V(1,0), V(0,1), V(1,1)),   // ┌
+        /* 13 */  S(V(0,0), V(1,0), V(1,1)),   // ┐
 
         //──────────────────────────────────────────────────────────────────────
-        // 4-CELL L-SHAPES (4'lü "L") – 8 rotations (J and L variants)
+        // LARGE L-SHAPES (4'lü "L", 8 rotations)
+        //  arm of 3 + single corner cell
         //──────────────────────────────────────────────────────────────────────
-        /* 6 */  S(V(0,0), V(0,1), V(0,2), V(1,0)),   // │+─ (J)
-        /* 7 */  S(V(0,0), V(1,0), V(1,1), V(1,2)),   // ─+│
-        /* 8 */  S(V(0,2), V(1,0), V(1,1), V(1,2)),   // ─+│ top
-        /* 9 */  S(V(0,0), V(0,1), V(0,2), V(1,2)),   // │+─ top
-        /*10 */  S(V(0,0), V(1,0), V(2,0), V(2,1)),   // L
-        /*11 */  S(V(0,0), V(0,1), V(1,0), V(2,0)),   // L rotated
-        /*12 */  S(V(0,1), V(1,1), V(2,0), V(2,1)),   // L
-        /*13 */  S(V(0,0), V(0,1), V(1,1), V(2,1)),   // L
+        // Foot goes right
+        /* 14 */  S(V(0,0), V(0,1), V(0,2), V(1,0)),   // │+─
+        /* 15 */  S(V(0,0), V(1,0), V(1,1), V(1,2)),   // ─+│
+        /* 16 */  S(V(0,2), V(1,0), V(1,1), V(1,2)),   // ─+│ (top)
+        /* 17 */  S(V(0,0), V(0,1), V(0,2), V(1,2)),   // │+─ (top)
+        // Foot goes left
+        /* 18 */  S(V(0,0), V(1,0), V(2,0), V(2,1)),
+        /* 19 */  S(V(0,0), V(0,1), V(1,0), V(2,0)),
+        /* 20 */  S(V(0,1), V(1,1), V(2,0), V(2,1)),
+        /* 21 */  S(V(0,0), V(0,1), V(1,1), V(2,1)),
 
         //──────────────────────────────────────────────────────────────────────
-        // 5-CELL L-SHAPES (5'li "L") – 8 rotations (corner & extended)
+        // T-SHAPES (normal "T", 4 rotations)
         //──────────────────────────────────────────────────────────────────────
-        /*14 */  S(V(0,0), V(1,0), V(2,0), V(0,1), V(0,2)),   // BL corner
-        /*15 */  S(V(0,0), V(1,0), V(2,0), V(2,1), V(2,2)),   // BR corner
-        /*16 */  S(V(0,0), V(0,1), V(0,2), V(1,2), V(2,2)),   // TL corner
-        /*17 */  S(V(0,2), V(1,2), V(2,0), V(2,1), V(2,2)),   // TR corner
-        /*18 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(0,1)),   // ───┘
-        /*19 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(3,1)),   // └───
-        /*20 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(1,0)),   // vertical + bottom foot right
-        /*21 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(1,3)),   // vertical + top foot right
+        /* 22 */  S(V(0,0), V(1,0), V(2,0), V(1,1)),   // ⊥  (pointing up)
+        /* 23 */  S(V(1,0), V(0,1), V(1,1), V(2,1)),   // ┬  (pointing down)
+        /* 24 */  S(V(0,0), V(0,1), V(0,2), V(1,1)),   // ├  (pointing right)
+        /* 25 */  S(V(0,1), V(1,0), V(1,1), V(1,2)),   // ┤  (pointing left)
 
         //──────────────────────────────────────────────────────────────────────
-        // 2-CELL I (2'li "I") – 2 rotations
+        // S / Z SHAPES (normal "Z", 4 orientations)
         //──────────────────────────────────────────────────────────────────────
-        /*22 */  S(V(0,0), V(0,1)),                               // vertical
-        /*23 */  S(V(0,0), V(1,0)),                               // horizontal
+        /* 26 */  S(V(0,0), V(1,0), V(1,1), V(2,1)),   // S horizontal
+        /* 27 */  S(V(0,1), V(1,0), V(1,1), V(2,0)),   // Z horizontal
+        /* 28 */  S(V(0,1), V(0,2), V(1,0), V(1,1)),   // S vertical
+        /* 29 */  S(V(0,0), V(0,1), V(1,1), V(1,2)),   // Z vertical
 
         //──────────────────────────────────────────────────────────────────────
-        // 3-CELL I (3'lü "I") – 2 rotations
+        // 2×3 / 3×2 RECTANGLES (6'lı dikdörtgen)
         //──────────────────────────────────────────────────────────────────────
-        /*24 */  S(V(0,0), V(0,1), V(0,2)),                       // vertical
-        /*25 */  S(V(0,0), V(1,0), V(2,0)),                       // horizontal
+        /* 30 */  S(V(0,0), V(1,0),
+                    V(0,1), V(1,1),
+                    V(0,2), V(1,2)),                   // 2 wide × 3 tall
+        /* 31 */  S(V(0,0), V(1,0), V(2,0),
+                    V(0,1), V(1,1), V(2,1)),           // 3 wide × 2 tall
 
         //──────────────────────────────────────────────────────────────────────
-        // 4-CELL I (4'lü "I") – 2 rotations
+        // 5-CELL EXTENDED L-SHAPES (5'li "L", 4 rotations)
+        //  arm of 4 + perpendicular foot
         //──────────────────────────────────────────────────────────────────────
-        /*26 */  S(V(0,0), V(0,1), V(0,2), V(0,3)),               // vertical
-        /*27 */  S(V(0,0), V(1,0), V(2,0), V(3,0)),               // horizontal
-
-        //──────────────────────────────────────────────────────────────────────
-        // 5-CELL I (5'li "I") – 2 rotations
-        //──────────────────────────────────────────────────────────────────────
-        /*28 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(0,4)),       // vertical
-        /*29 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(4,0)),       // horizontal
-
-        //──────────────────────────────────────────────────────────────────────
-        // 6-CELL I (6'lı "I") – 2 rotations (new)
-        //──────────────────────────────────────────────────────────────────────
-        /*30 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(0,4), V(0,5)), // vertical
-        /*31 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(4,0), V(5,0)), // horizontal
-
-        //──────────────────────────────────────────────────────────────────────
-        // T-SHAPES (normal "T") – 4 rotations
-        //──────────────────────────────────────────────────────────────────────
-        /*32 */  S(V(0,0), V(1,0), V(2,0), V(1,1)),   // ⊥  T pointing up
-        /*33 */  S(V(1,0), V(0,1), V(1,1), V(2,1)),   // ┬  T pointing down
-        /*34 */  S(V(0,0), V(0,1), V(0,2), V(1,1)),   // ├  T pointing right
-        /*35 */  S(V(0,1), V(1,0), V(1,1), V(1,2)),   // ┤  T pointing left
-
-        //──────────────────────────────────────────────────────────────────────
-        // Z-SHAPES (normal "Z") – 2 rotations (only Z, not S)
-        //──────────────────────────────────────────────────────────────────────
-        /*36 */  S(V(0,0), V(1,0), V(1,1), V(2,1)),   // Z horizontal
-        /*37 */  S(V(0,1), V(1,1), V(1,2), V(2,2)),   // Z vertical (corrected from original Z vertical)
+        /* 32 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(0,1)),   // ───┘
+        /* 33 */  S(V(0,0), V(1,0), V(2,0), V(3,0), V(3,1)),   // └───
+        /* 34 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(1,0)),   // vertical + bottom foot right
+        /* 35 */  S(V(0,0), V(0,1), V(0,2), V(0,3), V(1,3)),   // vertical + top foot right
     };
 
     // =========================================================================
     // ── Weight pools (shape indices + probability) ────────────────────────────
     // =========================================================================
-    //  Tiny  (2 cells)
-    //  Small (3 cells)
-    //  Medium(4 cells)
-    //  Large (5+ cells: 5,6,9)
+    //  Tiny  (≤2 cells) – appear often; easy to squeeze into gaps
+    //  Small (3–4 cells) – standard frequency
+    //  Medium(4–5 cells) – somewhat common
+    //  Large (5–9 cells) – rarer; punishing on tight grids
 
-    private static readonly int[] TinyPool = { 22, 23 };                 // 2-cell I
-    private static readonly int[] SmallPool = { 2, 3, 4, 5, 24, 25 };        // 3-cell L and I
-    private static readonly int[] MediumPool = { 0,                       // 2×2 square
-                                                  6,7,8,9,10,11,12,13,    // 4-cell L
-                                                  26,27,                  // 4-cell I
-                                                  32,33,34,35,            // T
-                                                  36,37 };                // Z
-    private static readonly int[] LargePool = { 1,                       // 3×3 square
-                                                  14,15,16,17,            // 5-cell corner L
-                                                  18,19,20,21,            // 5-cell extended L
-                                                  28,29,                  // 5-cell I
-                                                  30,31 };                // 6-cell I
+    private static readonly int[] TinyPool = { 0, 1 };                     // 2‑cell lines
+    private static readonly int[] SmallPool = { 2, 3, 8, 10, 11, 12, 13, 26, 27, 28, 29 }; // 3‑cell & simple 4‑cell
+    private static readonly int[] MediumPool = { 4, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 }; // 4‑cell complex
+    private static readonly int[] LargePool = { 6, 7, 9, 30, 31, 32, 33, 34, 35 }; // 5‑cell, 6‑cell, 9‑cell
 
     // =========================================================================
     // ── Public API ────────────────────────────────────────────────────────────
@@ -161,8 +152,7 @@ public static class BlockDefinitions
     ///
     /// When the grid is crowded (>55 % filled), the method:
     ///  1. Tries up to MAX_RETRIES times to find a shape that fits somewhere.
-    ///  2. If all retries fail, calls GetGuaranteedFit() to find any fitting shape.
-    ///  3. If still none fits, returns null (game over condition).
+    ///  2. If all retries fail, falls back to GetGuaranteedFit().
     /// </summary>
     public static BlockData GetRandom(float occupancyRatio = 0f)
     {
@@ -184,7 +174,7 @@ public static class BlockDefinitions
                 return data;
         }
 
-        // Fallback: try to find any shape that fits (escalating from smallest)
+        // Fallback — try every shape from smallest to largest
         return GetGuaranteedFit();
     }
 
@@ -233,14 +223,13 @@ public static class BlockDefinitions
 
     /// <summary>
     /// Returns the smallest shape that can still be placed on the current grid.
-    /// Tries tiny, then small, then medium, then large pools in order.
-    /// If no shape fits, returns null.
+    /// Tries tiny, small, medium, then large pools in order, shuffling each.
+    /// If nothing fits, returns a 2‑cell piece (the smallest available).
     /// </summary>
     public static BlockData GetGuaranteedFit()
     {
         Color color = RandomColor();
         var gm = GridManager.Instance;
-        if (gm == null) return null;
 
         // Escalate through pools in increasing size order
         int[][] escalate = { TinyPool, SmallPool, MediumPool, LargePool };
@@ -256,12 +245,13 @@ public static class BlockDefinitions
             foreach (int idx in indices)
             {
                 var data = new BlockData(AllShapes[idx], color);
-                if (gm.CanPlaceAnywhere(data)) return data;
+                if (gm == null || gm.CanPlaceAnywhere(data))
+                    return data;
             }
         }
 
-        // No shape fits at all → game over
-        return null;
+        // Ultimate fallback: return a 2‑cell piece (smallest available)
+        return new BlockData(AllShapes[TinyPool[0]], color);
     }
 
     private static Color RandomColor() => Palette[Random.Range(0, Palette.Length)];

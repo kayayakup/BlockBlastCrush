@@ -12,12 +12,29 @@ public class BlockSpawner : MonoBehaviour
 {
     public static BlockSpawner Instance { get; private set; }
 
-    private Block[]     _trayBlocks;
+    private Block[] _trayBlocks;
     private BlockData[] _trayData;
-    private Vector3[]   _slotPositions;
-    private bool[]      _slotFilled;
-    private int         _filledCount;
-    private Tween       _batchDelayTween;
+    private Vector3[] _slotPositions;
+    private bool[] _slotFilled;
+    private int _filledCount;
+    private Tween _batchDelayTween;
+
+    // Rare shapes: normal T, normal Z, 3'lü L, 4'lü L
+    // In BlockDefinitions these correspond to indices 10–29.
+    private static HashSet<Vector2Int[]> _rareShapes;
+    private const float RARE_ACCEPT_PROBABILITY = 0.2f; // 20% chance to keep a rare shape
+
+    // Lazy initialisation of the rare‑shape set
+    private static void EnsureRareShapesInitialized()
+    {
+        if (_rareShapes != null) return;
+        _rareShapes = new HashSet<Vector2Int[]>();
+        // Indices 10 through 29 are the rare ones (see BlockDefinitions)
+        for (int i = 10; i <= 29; i++)
+        {
+            _rareShapes.Add(BlockDefinitions.AllShapes[i]);
+        }
+    }
 
     void Awake() => Instance = this;
 
@@ -26,14 +43,14 @@ public class BlockSpawner : MonoBehaviour
     public void Initialize()
     {
         int n = Constants.TRAY_COUNT;
-        _trayBlocks    = new Block[n];
-        _trayData      = new BlockData[n];
+        _trayBlocks = new Block[n];
+        _trayData = new BlockData[n];
         _slotPositions = new Vector3[n];
-        _slotFilled    = new bool[n];
+        _slotFilled = new bool[n];
 
         // Compute evenly-spaced horizontal slot positions
         float spacing = Constants.TRAY_SLOT_SPACING;
-        float startX  = -(n - 1) * 0.5f * spacing;
+        float startX = -(n - 1) * 0.5f * spacing;
         for (int i = 0; i < n; i++)
             _slotPositions[i] = new Vector3(startX + i * spacing, Constants.TRAY_Y, 0f);
 
@@ -52,8 +69,8 @@ public class BlockSpawner : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    public Block     GetBlock(int slot)     => _trayBlocks[slot];
-    public int       FilledCount            => _filledCount;
+    public Block GetBlock(int slot) => _trayBlocks[slot];
+    public int FilledCount => _filledCount;
 
     /// <summary>BlockData for every still-available tray slot.</summary>
     public BlockData[] GetAvailableData()
@@ -105,6 +122,34 @@ public class BlockSpawner : MonoBehaviour
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Returns a random BlockData, but with reduced probability for rare shapes.
+    /// Uses rejection sampling: when a rare shape is drawn, it is kept only with probability RARE_ACCEPT_PROBABILITY.
+    /// </summary>
+    private BlockData GetRandomWithRarity(float occ, int maxAttempts = 15)
+    {
+        EnsureRareShapesInitialized();
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            var data = BlockDefinitions.GetRandom(occ);
+            if (_rareShapes.Contains(data.Cells))
+            {
+                // Rare shape: accept only with low probability
+                if (Random.value < RARE_ACCEPT_PROBABILITY)
+                    return data;
+                // Otherwise retry
+            }
+            else
+            {
+                // Common shape: always accept
+                return data;
+            }
+        }
+        // Fallback – just return whatever the standard method gives
+        return BlockDefinitions.GetRandom(occ);
+    }
+
     private void SpawnBatch()
     {
         _filledCount = 0;
@@ -115,14 +160,13 @@ public class BlockSpawner : MonoBehaviour
                     ? GridManager.Instance.GetOccupancyRatio()
                     : 0f;
 
-        // On a tight grid, guarantee at least ONE piece in the batch fits.
-        // We generate all three first, then do one safety pass.
+        // Generate candidates with rarity control
         var candidates = new BlockData[Constants.TRAY_COUNT];
         for (int i = 0; i < Constants.TRAY_COUNT; i++)
-            candidates[i] = BlockDefinitions.GetRandom(occ);
+            candidates[i] = GetRandomWithRarity(occ);
 
         // Safety pass: if none of the three fit anywhere, replace one with
-        // a single-cell piece (always fits while any cell is free).
+        // a guaranteed-fit piece (avoids deadlocks on very crowded grids).
         if (occ > 0.55f && GridManager.Instance != null)
         {
             bool anyFits = false;
@@ -138,14 +182,14 @@ public class BlockSpawner : MonoBehaviour
 
         for (int i = 0; i < Constants.TRAY_COUNT; i++)
         {
-            var data       = candidates[i];
-            _trayData[i]   = data;
+            var data = candidates[i];
+            _trayData[i] = data;
             _slotFilled[i] = true;
             _filledCount++;
 
-            int   capturedI = i;
-            var   capturedD = data;
-            float delay     = i * 0.06f;
+            int capturedI = i;
+            var capturedD = data;
+            float delay = i * 0.06f;
             DOVirtual.DelayedCall(delay, () => {
                 _trayBlocks[capturedI].Setup(capturedD, capturedI, _slotPositions[capturedI]);
                 if (capturedI == 0) AudioManager.Instance?.PlaySpawn();

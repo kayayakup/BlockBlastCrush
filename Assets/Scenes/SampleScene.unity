@@ -509,6 +509,10 @@ MonoBehaviour:
   clipScore: {fileID: 8300000, guid: 937ac6c170d76af4b849a5a1a590e246, type: 3}
   clipSpawn: {fileID: 8300000, guid: fd5d4ab1616a88e4fba12ffbef49dd8a, type: 3}
   clipGameOver: {fileID: 8300000, guid: e29a7a49dfc45f74db1a156bfa17d716, type: 3}
+  fireWorks:
+  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
+  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
+  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
   volumePickup: 0.8
   volumePlace: 0.85
   volumeReturn: 0.8

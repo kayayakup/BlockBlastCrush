@@ -30,8 +30,8 @@ public class GridManager : MonoBehaviour
     private readonly List<Vector2Int> _highlighted = new List<Vector2Int>();
 
     // ── Events ─────────────────────────────────────────────────────────────────
-    /// <summary>Fired when lines are cleared. Args: (lineCount, cellCount).</summary>
-    public event System.Action<int, int> OnLinesCleared;
+    /// <summary>Fired when lines are cleared. Args: (fullCols, fullRows, cellCount).</summary>
+    public event System.Action<List<int>, List<int>, int> OnLinesCleared;
 
     void Awake() => Instance = this;
 
@@ -286,7 +286,7 @@ public class GridManager : MonoBehaviour
 
         int lineCount = fullCols.Count + fullRows.Count;
         ScoreManager.Instance.AddScore(lineCount * Constants.POINTS_PER_LINE);
-        OnLinesCleared?.Invoke(lineCount, toClear.Count);
+        OnLinesCleared?.Invoke(fullCols, fullRows, toClear.Count);
         AudioManager.Instance?.PlayLineClear(lineCount);
 
         // Animate cells out (staggered)
