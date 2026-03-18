@@ -19,6 +19,7 @@ public class GridManager : MonoBehaviour
     private Color[,] _cellColor;
 
     // ── Visuals ────────────────────────────────────────────────────────────────
+    [SerializeField] private Sprite _gridBackgroundSprite;
     private SpriteRenderer[,] _cellSR;     // main cell visual
     private SpriteRenderer[,] _overlaySR;  // highlight overlay
 
@@ -204,17 +205,32 @@ public class GridManager : MonoBehaviour
     private void BuildBackground()
     {
         float cs  = Constants.CELL_SIZE;
-        float pad = cs * 0.22f;
-        float bw  = Constants.GRID_COLS * cs + pad * 2f;
-        float bh  = Constants.GRID_ROWS * cs + pad * 2f;
+        // The background should be 0.5 units larger than the grid area (Cols * CellSize)
+        float bw  = Constants.GRID_COLS * cs + 0.5f;
+        float bh  = Constants.GRID_ROWS * cs + 0.5f;
 
         var bg = new GameObject("GridBG");
         bg.transform.SetParent(transform);
         bg.transform.position   = new Vector3(Constants.GRID_CENTER_X, Constants.GRID_CENTER_Y, 0.5f);
-        bg.transform.localScale = new Vector3(bw, bh, 1f);
 
-        var sr          = bg.AddComponent<SpriteRenderer>();
-        sr.sprite       = TextureUtils.CreateRoundedRect(100, 100, 10, Constants.GridBgColor);
+        var sr = bg.AddComponent<SpriteRenderer>();
+
+        // Load from Resources as requested, fallback to Inspector if already there
+        if (_gridBackgroundSprite == null)
+            _gridBackgroundSprite = Resources.Load<Sprite>("GridBG");
+
+        if (_gridBackgroundSprite != null)
+        {
+            sr.sprite = _gridBackgroundSprite;
+            // Scale sprite to fit the 0.5-unit-larger dimensions
+            Vector2 spriteSize = _gridBackgroundSprite.bounds.size;
+            bg.transform.localScale = new Vector3(bw / spriteSize.x, bh / spriteSize.y, 1f);
+        }
+        else
+        {
+            bg.transform.localScale = new Vector3(bw, bh, 1f);
+            sr.sprite = TextureUtils.CreateRoundedRect(100, 100, 10, Constants.GridBgColor);
+        }
         sr.sortingOrder = 0;
     }
 

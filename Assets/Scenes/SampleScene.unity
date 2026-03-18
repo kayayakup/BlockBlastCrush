@@ -437,6 +437,7 @@ GameObject:
   m_Component:
   - component: {fileID: 464268172}
   - component: {fileID: 464268171}
+  - component: {fileID: 464268173}
   m_Layer: 0
   m_Name: Bootstrap
   m_TagString: Untagged
@@ -471,6 +472,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &464268173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464268170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 735fece10c25aca498a48e4025c53993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridManager
+  _gridBackgroundSprite: {fileID: 21300000, guid: e8d2128aa0b60534197146e53c994659, type: 3}
 --- !u!1 &1853823442
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,10 +523,6 @@ MonoBehaviour:
   clipScore: {fileID: 8300000, guid: 937ac6c170d76af4b849a5a1a590e246, type: 3}
   clipSpawn: {fileID: 8300000, guid: fd5d4ab1616a88e4fba12ffbef49dd8a, type: 3}
   clipGameOver: {fileID: 8300000, guid: e29a7a49dfc45f74db1a156bfa17d716, type: 3}
-  fireWorks:
-  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
-  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
-  - {fileID: 8300000, guid: 540f145534d471440a257265f1a17a18, type: 3}
   volumePickup: 0.8
   volumePlace: 0.85
   volumeReturn: 0.8

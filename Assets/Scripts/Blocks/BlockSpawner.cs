@@ -48,11 +48,22 @@ public class BlockSpawner : MonoBehaviour
         _slotPositions = new Vector3[n];
         _slotFilled = new bool[n];
 
-        // Compute evenly-spaced horizontal slot positions
-        float spacing = Constants.TRAY_SLOT_SPACING;
-        float startX = -(n - 1) * 0.5f * spacing;
+        // Compute 2x3 grid positions (3 columns, 2 rows)
+        float colSpacing = Constants.TRAY_SLOT_SPACING;
+        float rowSpacing = LayoutConfig.TrayRowSpacing;
+        float startX = -1.0f * colSpacing; // (3-1) * 0.5 * spacing = 1.0 * spacing
+        
         for (int i = 0; i < n; i++)
-            _slotPositions[i] = new Vector3(startX + i * spacing, Constants.TRAY_Y, 0f);
+        {
+            int row = i / 3; // 0 for first 3, 1 for next 3
+            int col = i % 3; // 0, 1, 2
+            
+            float x = startX + col * colSpacing;
+            // First row (i=0,1,2) at Y, second row (i=3,4,5) at Y - rowSpacing
+            float y = Constants.TRAY_Y - row * rowSpacing;
+            
+            _slotPositions[i] = new Vector3(x, y, 0f);
+        }
 
         // Pre-create Block GameObjects (reused for the whole session)
         for (int i = 0; i < n; i++)
