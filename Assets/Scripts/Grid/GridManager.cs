@@ -34,7 +34,18 @@ public class GridManager : MonoBehaviour
     /// <summary>Fired when lines are cleared. Args: (fullCols, fullRows, cellCount).</summary>
     public event System.Action<List<int>, List<int>, int> OnLinesCleared;
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        Instance = this;
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged += RefreshAllCells;
+    }
+
+    void OnDestroy()
+    {
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged -= RefreshAllCells;
+    }
 
     // ── Initialisation ─────────────────────────────────────────────────────────
 
@@ -157,13 +168,67 @@ public class GridManager : MonoBehaviour
     public void ShowHighlight(IEnumerable<Vector2Int> cells, bool valid)
     {
         ClearHighlight();
-        Color tint = valid ? Constants.HighlightValid : Constants.HighlightInvalid;
-
-        foreach (var cell in cells)
+        if (!valid)
         {
-            _highlighted.Add(cell);
+            foreach (var cell in cells)
+                if (InBounds(cell.x, cell.y))
+                {
+                    _overlaySR[cell.x, cell.y].color = Constants.HighlightInvalid;
+                    _highlighted.Add(cell);
+                }
+            return;
+        }
+
+        // 1. Temporarily mark potential cells as occupied to check for completed lines
+        List<Vector2Int> proposed = new List<Vector2Int>(cells);
+        foreach (var cell in proposed)
+            if (InBounds(cell.x, cell.y)) _occupied[cell.x, cell.y] = true;
+
+        var fullCols = new List<int>();
+        var fullRows = new List<int>();
+        for (int c = 0; c < Constants.GRID_COLS; c++)
+        {
+            bool full = true;
+            for (int r = 0; r < Constants.GRID_ROWS; r++) if (!_occupied[c, r]) { full = false; break; }
+            if (full) fullCols.Add(c);
+        }
+        for (int r = 0; r < Constants.GRID_ROWS; r++)
+        {
+            bool full = true;
+            for (int c = 0; c < Constants.GRID_COLS; c++) if (!_occupied[c, r]) { full = false; break; }
+            if (full) fullRows.Add(r);
+        }
+
+        // Revert temporary occupation
+        foreach (var cell in proposed)
+            if (InBounds(cell.x, cell.y)) _occupied[cell.x, cell.y] = false;
+
+        // 2. Draw line highlights (yellow)
+        foreach (int c in fullCols)
+        {
+            for (int r = 0; r < Constants.GRID_ROWS; r++)
+            {
+                _overlaySR[c, r].color = Constants.HighlightLine;
+                _highlighted.Add(new Vector2Int(c, r));
+            }
+        }
+        foreach (int r in fullRows)
+        {
+            for (int c = 0; c < Constants.GRID_COLS; c++)
+            {
+                _overlaySR[c, r].color = Constants.HighlightLine;
+                _highlighted.Add(new Vector2Int(c, r));
+            }
+        }
+
+        // 3. Draw block highlight (white) - overrides line highlight if overlapping
+        foreach (var cell in proposed)
+        {
             if (InBounds(cell.x, cell.y))
-                _overlaySR[cell.x, cell.y].color = tint;
+            {
+                _overlaySR[cell.x, cell.y].color = Constants.HighlightValid;
+                _highlighted.Add(cell);
+            }
         }
     }
 
@@ -310,6 +375,12 @@ public class GridManager : MonoBehaviour
         int lineCount = fullCols.Count + fullRows.Count;
         ScoreManager.Instance.AddScore(lineCount * Constants.POINTS_PER_LINE);
         OnLinesCleared?.Invoke(fullCols, fullRows, toClear.Count);
+
+        if (lineCount >= 2)
+        {
+            StyleManager.Instance?.NextStyle();
+        }
+
         AudioManager.Instance?.PlayLineClear(lineCount);
 
         // Animate cells out (staggered)
@@ -365,6 +436,21 @@ public class GridManager : MonoBehaviour
                 DOTween.Kill(_cellSR[c, r].transform);
                 _cellSR[c, r].transform
                     .DOPunchScale(Vector3.one * 0.12f, Constants.ANIM_PULSE, 1, 0.3f);
+            }
+        }
+    }
+
+    private void RefreshAllCells()
+    {
+        for (int c = 0; c < Constants.GRID_COLS; c++)
+        {
+            for (int r = 0; r < Constants.GRID_ROWS; r++)
+            {
+                if (_occupied[c, r])
+                {
+                    var sr = _cellSR[c, r];
+                    sr.sprite = TextureUtils.GetBlockSprite(_cellColor[c, r]);
+                }
             }
         }
     }

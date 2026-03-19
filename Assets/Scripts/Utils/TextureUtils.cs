@@ -17,37 +17,54 @@ public static class TextureUtils
     public static Sprite CrownSprite => _crownSprite ?? (_crownSprite = BuildCrownSprite());
     public static Sprite GearSprite => _gearSprite ?? (_gearSprite = BuildGearSprite());
 
+    public static void ClearCache()
+    {
+        _blockCache.Clear();
+    }
+
     public static Sprite GetBlockSprite(Color baseColor)
     {
         if (_blockCache.TryGetValue(baseColor, out var cached)) return cached;
 
-        const int W = RESOLUTION, H = RESOLUTION;
-        const float R = 68f;
-        const float B = 52f;
+        int style = StyleManager.Instance != null ? StyleManager.Instance.CurrentStyleIndex : 0;
 
+        const int W = RESOLUTION, H = RESOLUTION;
         var tex = NewTex(W, H);
         var px = new Color[W * H];
 
-        // Renk paleti - 3D Efektleri için
-        Color hiTop = Brighten(baseColor, 0.58f);
-        Color hiGloss = Brighten(baseColor, 0.85f);
-        Color shBot = Darken(baseColor, 0.50f);
-        Color shRight = Darken(baseColor, 0.30f);
-        Color hiLeft = Brighten(baseColor, 0.22f);
-        Color face = Desaturate(baseColor, 0.07f);
+        // ── Style Variations (Configure BEFORE loop) ─────────────────────────
+        float R = 68f;      // Default Corner Radius
+        float B = 52f;      // Default Bevel size
+        float G = 0.6f;     // Default Gloss intensity
+        
+        switch (style)
+        {
+            case 1: R = 20f;  break; // Sharp
+            case 2: R = 200f; break; // Circular
+            case 3: R = 40f;  break; // Industrial
+            case 4: R = 60f;  break; // Glowing
+            case 5: R = 80f;  break; // Patterned
+            case 6: R = 30f;  break; // Crystal
+            case 7: R = 150f; break; // Modern
+            case 8: R = 100f; break; // Playful
+            case 9: R = 0f;   break; // Square
+        }
 
-        float inset = B * 1.05f;
-        float cx = W * 0.5f;
-        float cy = H * 0.5f;
+        // Palette for 3D Effects
+        Color hiTop = Brighten(baseColor, 0.58f);
+        Color shBot = Darken(baseColor, 0.50f);
+        Color face = baseColor;
+        Color edge = Darken(baseColor, 0.85f);
 
         for (int y = 0; y < H; y++)
         {
             for (int x = 0; x < W; x++)
             {
-                // Mükemmel kenar yumuşatma için SDF
                 float alpha = RoundedRectSDF(x, y, W, H, R);
                 if (alpha <= 0.001f) { px[y * W + x] = Color.clear; continue; }
 
+                float nx = (float)x / (W - 1);
+                float ny = (float)y / (H - 1);
                 float dTop = (H - 1) - y;
                 float dBot = y;
                 float dLeft = x;
@@ -55,20 +72,72 @@ public static class TextureUtils
 
                 Color c = face;
 
-                // 3D Bevel (Eğim) Gölgelendirmesi
-                if (dBot < B) { float t = Mathf.Clamp01(1f - dBot / B); c = Color.Lerp(c, shBot, t * t * 0.92f); }
-                if (dRight < B) { float t = Mathf.Clamp01(1f - dRight / B); c = Color.Lerp(c, shRight, t * t * 0.72f); }
-                if (dTop < B) { float t = Mathf.Clamp01(1f - dTop / B); c = Color.Lerp(c, hiTop, t * t * 0.88f); }
-                if (dLeft < B) { float t = Mathf.Clamp01(1f - dLeft / B); c = Color.Lerp(c, hiLeft, t * t * 0.52f); }
-
-                // Parlama Şeridi (Glossy Stripe)
-                float glossLo = H - inset - 50f;
-                float glossHi = H - inset - 14f;
-                if (y >= glossLo && y <= glossHi && x > inset + 18f && x < W - inset - 18f)
+                switch (style)
                 {
-                    float gt = SmoothStep(glossLo, glossLo + 10f, y) * SmoothStep(glossHi, glossHi - 10f, y);
-                    float gx = SmoothStep(inset, inset + 40f, x) * SmoothStep(W - inset, W - inset - 40f, x);
-                    c = Color.Lerp(c, hiGloss, gt * gx * 0.6f);
+                    case 0: // Classic Beveled
+                        if (dBot < B) c = Color.Lerp(c, shBot, Mathf.Clamp01(1f - dBot / B) * 0.9f);
+                        if (dTop < B) c = Color.Lerp(c, hiTop, Mathf.Clamp01(1f - dTop / B) * 0.8f);
+                        if (ny > 0.75f && nx > 0.2f && nx < 0.8f) c = Color.Lerp(c, Color.white, (ny - 0.75f) * 4f * G);
+                        break;
+
+                    case 1: // Modern Outline (Strong Border)
+                        float border1 = 30f;
+                        if (dBot < border1 || dTop < border1 || dLeft < border1 || dRight < border1) c = edge;
+                        else c = Brighten(baseColor, 0.15f);
+                        break;
+
+                    case 2: // Glazed / Jelly (Soft Center Glow)
+                        float distCenter = Vector2.Distance(new Vector2(nx, ny), new Vector2(0.35f, 0.75f));
+                        c = Color.Lerp(baseColor, Color.white, Mathf.Clamp01(1f - distCenter * 2.2f) * 0.8f);
+                        break;
+
+                    case 3: // Metal (Brushed Gradient)
+                        float metalB = 15f;
+                        if (dBot < metalB || dTop < metalB || dLeft < metalB || dRight < metalB) c = Color.black;
+                        else {
+                            float noise = Mathf.Repeat(nx * 40f, 1f) > 0.8f ? 0.08f : 0f;
+                            c = Color.Lerp(Darken(baseColor, 0.3f), Brighten(baseColor, 0.3f), ny + noise);
+                        }
+                        break;
+
+                    case 4: // Neon (Glowing Edges)
+                        float glowB = 45f;
+                        float minEdge = Mathf.Min(Mathf.Min(dBot, dTop), Mathf.Min(dLeft, dRight));
+                        if (minEdge < glowB) c = Color.Lerp(Brighten(baseColor, 1.0f), baseColor, minEdge / glowB);
+                        else c = Darken(baseColor, 0.4f);
+                        break;
+
+                    case 5: // Striped Pattern
+                        bool stripe = (int)((x + y) / 45f) % 2 == 0;
+                        c = stripe ? baseColor : Darken(baseColor, 0.25f);
+                        if (dBot < 12f || dTop < 12f || dLeft < 12f || dRight < 12f) c = Color.black;
+                        break;
+
+                    case 6: // Crystal (Cross Shading)
+                        float shade = Mathf.Clamp01(Mathf.Abs(nx - 0.5f) + Mathf.Abs(ny - 0.5f));
+                        c = Color.Lerp(Brighten(baseColor, 0.6f), Darken(baseColor, 0.5f), shade);
+                        break;
+
+                    case 7: // Modern Flat (Gradient + Bottom Shadow)
+                        c = Color.Lerp(Darken(baseColor, 0.2f), baseColor, ny);
+                        if (dBot < 10f) c = Darken(c, 0.3f);
+                        break;
+
+                    case 8: // Dotted Interior
+                        bool dot = (x % 50 < 15) && (y % 50 < 15);
+                        c = dot ? Brighten(baseColor, 0.5f) : baseColor;
+                        if (dBot < 20f || dTop < 20f || dLeft < 20f || dRight < 20f) c = edge;
+                        break;
+
+                    case 9: // Retro (Thick Outlines)
+                        float frame = 45f;
+                        if (dBot < frame || dTop < frame || dLeft < frame || dRight < frame) 
+                        {
+                            if (dBot < 10f || dTop < 10f || dLeft < 10f || dRight < 10f) c = Color.black;
+                            else c = Darken(baseColor, 0.5f);
+                        }
+                        else c = Color.Lerp(baseColor, Brighten(baseColor, 0.2f), ny);
+                        break;
                 }
 
                 c.a = alpha * baseColor.a;

@@ -42,6 +42,7 @@ public class Bootstrap : MonoBehaviour
         var input       = Spawn<InputHandler>  ("InputHandler");
         var gameMgr     = Spawn<GameManager>   ("GameManager");
         var effectMgr   = Spawn<EffectManager> ("EffectManager");
+        var styleMgr    = Spawn<StyleManager>  ("StyleManager");
 
         // AudioManager must already exist in the scene with clips assigned via Inspector.
         var audioMgr  = FindAnyObjectByType<AudioManager>();

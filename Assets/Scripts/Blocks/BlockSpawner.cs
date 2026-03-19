@@ -37,7 +37,18 @@ public class BlockSpawner : MonoBehaviour
         }
     }
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        Instance = this;
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged += RefreshTray;
+    }
+
+    void OnDestroy()
+    {
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged -= RefreshTray;
+    }
 
     // ── Initialisation ────────────────────────────────────────────────────────
 
@@ -193,6 +204,16 @@ public class BlockSpawner : MonoBehaviour
                 _trayBlocks[capturedI].Setup(capturedD, capturedI, _slotPositions[capturedI]);
                 if (capturedI == 0) AudioManager.Instance?.PlaySpawn();
             });
+        }
+    }
+
+    private void RefreshTray()
+    {
+        if (_trayBlocks == null) return;
+        foreach (var b in _trayBlocks)
+        {
+            if (b != null)
+                b.RefreshStyle();
         }
     }
 }

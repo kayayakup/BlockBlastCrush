@@ -332,8 +332,8 @@ MonoBehaviour:
   clipPickup: {fileID: 8300000, guid: 072c1a7d39b806e4797f6d363748b01d, type: 3}
   clipPlace: {fileID: 8300000, guid: 9324fa15cbf91c240b29a0aaa8981188, type: 3}
   clipReturn: {fileID: 8300000, guid: 51b49d916a2d6614baf8edcb7cf83344, type: 3}
-  clipLineClear1: {fileID: 8300000, guid: 6ffcee1c7988d994095e6c6ad5421504, type: 3}
-  clipLineClear2: {fileID: 8300000, guid: d0a248895ffa3b24bbaf0191f34e5c28, type: 3}
+  clipLineClear1: {fileID: 8300000, guid: d0a248895ffa3b24bbaf0191f34e5c28, type: 3}
+  clipLineClear2: {fileID: 8300000, guid: 6ffcee1c7988d994095e6c6ad5421504, type: 3}
   clipScore: {fileID: 8300000, guid: 937ac6c170d76af4b849a5a1a590e246, type: 3}
   clipSpawn: {fileID: 8300000, guid: fd5d4ab1616a88e4fba12ffbef49dd8a, type: 3}
   clipGameOver: {fileID: 8300000, guid: e29a7a49dfc45f74db1a156bfa17d716, type: 3}

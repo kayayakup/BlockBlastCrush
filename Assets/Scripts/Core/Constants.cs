@@ -37,6 +37,7 @@ public static class Constants
     public static readonly Color TrayBgColor      = new Color(0.040f, 0.170f, 0.370f);
     public static readonly Color HighlightValid   = new Color(1.00f, 1.00f, 1.00f, 0.55f);
     public static readonly Color HighlightInvalid = new Color(1.00f, 0.12f, 0.12f, 0.55f);
+    public static readonly Color HighlightLine    = new Color(1.00f, 1.00f, 0.40f, 0.75f); // Bright yellow highlight for full lines
     public static readonly Color TopBarColor      = new Color(0.060f, 0.290f, 0.580f);
 
     // ── Layout shortcuts (redirect to LayoutConfig) ───────────────────────────

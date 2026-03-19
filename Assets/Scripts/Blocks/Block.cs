@@ -31,6 +31,15 @@ public class Block : MonoBehaviour
     {
         _col           = GetComponent<BoxCollider2D>();
         _col.isTrigger = true;
+        
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged += RefreshStyle;
+    }
+
+    void OnDestroy()
+    {
+        if (StyleManager.Instance != null)
+            StyleManager.Instance.OnStyleChanged -= RefreshStyle;
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -134,6 +143,18 @@ public class Block : MonoBehaviour
     {
         if (!isActiveAndEnabled || !IsAvailable) return false;
         return _col.OverlapPoint(worldPoint);
+    }
+
+    /// <summary>Updates the sprites of all cells to match the current style.</summary>
+    public void RefreshStyle()
+    {
+        if (Data == null) return;
+        
+        var newSprite = TextureUtils.GetBlockSprite(Data.Color);
+        foreach (var sr in _cellRenderers)
+        {
+            sr.sprite = newSprite;
+        }
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
