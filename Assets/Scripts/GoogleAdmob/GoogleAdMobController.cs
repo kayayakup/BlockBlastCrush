@@ -1,5 +1,6 @@
 using UnityEngine;
 using GoogleMobileAds.Api;
+using System;
 
 public class GoogleAdMobController : MonoBehaviour
 {
@@ -10,8 +11,8 @@ public class GoogleAdMobController : MonoBehaviour
     private InterstitialAd interstitial;
 
     // Replace with your real Ad Unit IDs
-    private string bannerID = "ca-app-pub-3940256099942544/6300978111";
-    private string interstitialID = "ca-app-pub-3940256099942544/1033173712";
+    private string bannerID = "";
+    private string interstitialID = "";
 
     private void Awake()
     {
@@ -20,16 +21,21 @@ public class GoogleAdMobController : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
-    private void Start()
-    {
-        // Initialize AdMob
-        MobileAds.Initialize(initStatus => { });
+    //private void Start()
+    //{
+    //    // Initialize AdMob
+    //    MobileAds.Initialize(initStatus => { });
 
-        LoadBanner();
-        LoadInterstitial();
-    }
+    //    LoadBanner();
+    //    LoadInterstitial();
+    //}
 
 
 

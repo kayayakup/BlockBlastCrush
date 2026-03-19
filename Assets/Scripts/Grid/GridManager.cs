@@ -15,13 +15,13 @@ public class GridManager : MonoBehaviour
     public static GridManager Instance { get; private set; }
 
     // ── State ──────────────────────────────────────────────────────────────────
-    private bool[,]  _occupied;
+    private bool[,] _occupied;
     private Color[,] _cellColor;
 
     // ── Visuals ────────────────────────────────────────────────────────────────
-    [SerializeField] private Sprite _gridBackgroundSprite;
     private SpriteRenderer[,] _cellSR;     // main cell visual
     private SpriteRenderer[,] _overlaySR;  // highlight overlay
+    private SpriteRenderer _bgSR;           // background sprite renderer
 
     // ── Geometry (world space) ─────────────────────────────────────────────────
     public float OriginX { get; private set; }
@@ -41,10 +41,10 @@ public class GridManager : MonoBehaviour
     public void Initialize()
     {
         int C = Constants.GRID_COLS, R = Constants.GRID_ROWS;
-        _occupied   = new bool[C, R];
-        _cellColor  = new Color[C, R];
-        _cellSR     = new SpriteRenderer[C, R];
-        _overlaySR  = new SpriteRenderer[C, R];
+        _occupied = new bool[C, R];
+        _cellColor = new Color[C, R];
+        _cellSR = new SpriteRenderer[C, R];
+        _overlaySR = new SpriteRenderer[C, R];
 
         float cs = Constants.CELL_SIZE;
         OriginX = Constants.GRID_CENTER_X - C * cs * 0.5f;
@@ -71,7 +71,6 @@ public class GridManager : MonoBehaviour
             Mathf.RoundToInt((worldPos.x - OriginX - cs * 0.5f) / cs),
             Mathf.RoundToInt((worldPos.y - OriginY - cs * 0.5f) / cs));
     }
-
 
     /// <summary>
     /// Returns 0..1 ratio of filled cells to total cells.
@@ -128,12 +127,12 @@ public class GridManager : MonoBehaviour
             int col = originCol + c.x;
             int row = originRow + c.y;
 
-            _occupied[col, row]  = true;
+            _occupied[col, row] = true;
             _cellColor[col, row] = data.Color;
 
             var sr = _cellSR[col, row];
             sr.sprite = TextureUtils.GetBlockSprite(data.Color);
-            sr.color  = Color.white;
+            sr.color = Color.white;
 
             // Placement punch
             DOTween.Kill(sr.transform);
@@ -187,14 +186,14 @@ public class GridManager : MonoBehaviour
         {
             for (int r = 0; r < Constants.GRID_ROWS; r++)
             {
-                _occupied[c, r]  = false;
+                _occupied[c, r] = false;
                 _cellColor[c, r] = default;
 
                 var sr = _cellSR[c, r];
                 DOTween.Kill(sr.transform);
                 DOTween.Kill(sr);
-                sr.sprite       = TextureUtils.WhiteCellSprite;
-                sr.color        = Constants.CellEmptyColor;
+                sr.sprite = TextureUtils.WhiteCellSprite;
+                sr.color = Constants.CellEmptyColor;
                 sr.transform.localScale = Vector3.one * vScale;
             }
         }
@@ -204,39 +203,47 @@ public class GridManager : MonoBehaviour
 
     private void BuildBackground()
     {
-        float cs  = Constants.CELL_SIZE;
-        // The background should be 0.5 units larger than the grid area (Cols * CellSize)
-        float bw  = Constants.GRID_COLS * cs + 0.5f;
-        float bh  = Constants.GRID_ROWS * cs + 0.5f;
+        float cs = Constants.CELL_SIZE;
+        float gridWidth = Constants.GRID_COLS * cs;
+        float gridHeight = Constants.GRID_ROWS * cs;
 
         var bg = new GameObject("GridBG");
         bg.transform.SetParent(transform);
-        bg.transform.position   = new Vector3(Constants.GRID_CENTER_X, Constants.GRID_CENTER_Y, 0.5f);
+        bg.transform.position = new Vector3(Constants.GRID_CENTER_X, Constants.GRID_CENTER_Y, 0.5f);
+        bg.transform.localScale = Vector3.one;
 
-        var sr = bg.AddComponent<SpriteRenderer>();
+        _bgSR = bg.AddComponent<SpriteRenderer>();
+        _bgSR.sortingOrder = -1; // En arkada görünmesi için
 
-        // Load from Resources as requested, fallback to Inspector if already there
-        if (_gridBackgroundSprite == null)
-            _gridBackgroundSprite = Resources.Load<Sprite>("GridBG");
+        // Resources klasöründen "GridBG" sprite'ını yükle
+        Sprite gridBGSprite = Resources.Load<Sprite>("GridBG");
 
-        if (_gridBackgroundSprite != null)
+        if (gridBGSprite != null)
         {
-            sr.sprite = _gridBackgroundSprite;
-            // Scale sprite to fit the 0.5-unit-larger dimensions
-            Vector2 spriteSize = _gridBackgroundSprite.bounds.size;
-            bg.transform.localScale = new Vector3(bw / spriteSize.x, bh / spriteSize.y, 1f);
+            _bgSR.sprite = gridBGSprite;
+
+            // Sprite'ın orijinal boyutunu al
+            float spriteWidth = gridBGSprite.bounds.size.x - 1.5f;
+            float spriteHeight = gridBGSprite.bounds.size.y - 1.5f;
+
+            // Grid boyutlarına göre scale hesapla (en-boy oranını korumadan)
+            float scaleX = gridWidth / spriteWidth;
+            float scaleY = gridHeight / spriteHeight;
+            bg.transform.localScale = new Vector3(scaleX, scaleY, 1f);
         }
         else
         {
-            bg.transform.localScale = new Vector3(bw, bh, 1f);
-            sr.sprite = TextureUtils.CreateRoundedRect(100, 100, 10, Constants.GridBgColor);
+            Debug.LogError("GridBG sprite not found in Resources folder! Please place a sprite named 'GridBG' in Assets/Resources/");
+
+            // Fallback: eğer sprite bulunamazsa, eski yöntemle düz renkli bir arkaplan oluştur
+            _bgSR.sprite = TextureUtils.CreateRoundedRect(100, 100, 10, Constants.GridBgColor);
+            bg.transform.localScale = new Vector3(gridWidth, gridHeight, 1f);
         }
-        sr.sortingOrder = 0;
     }
 
     private void BuildCells()
     {
-        float cs     = Constants.CELL_SIZE;
+        float cs = Constants.CELL_SIZE;
         float vScale = cs * Constants.CELL_VISUAL_RATIO;
 
         for (int c = 0; c < Constants.GRID_COLS; c++)
@@ -248,24 +255,24 @@ public class GridManager : MonoBehaviour
                 // ── Main cell sprite ──────────────────────────────────────
                 var cellGO = new GameObject($"Cell_{c}_{r}");
                 cellGO.transform.SetParent(transform);
-                cellGO.transform.position   = pos + new Vector3(0, 0, 0.3f);
+                cellGO.transform.position = pos + new Vector3(0, 0, 0.3f);
                 cellGO.transform.localScale = Vector3.one * vScale;
 
-                var csr         = cellGO.AddComponent<SpriteRenderer>();
-                csr.sprite      = TextureUtils.WhiteCellSprite;
-                csr.color       = Constants.CellEmptyColor;
+                var csr = cellGO.AddComponent<SpriteRenderer>();
+                csr.sprite = TextureUtils.WhiteCellSprite;
+                csr.color = Constants.CellEmptyColor;
                 csr.sortingOrder = 1;
-                _cellSR[c, r]  = csr;
+                _cellSR[c, r] = csr;
 
                 // ── Overlay sprite (highlight) ─────────────────────────────
                 var ovGO = new GameObject($"Overlay_{c}_{r}");
                 ovGO.transform.SetParent(transform);
-                ovGO.transform.position   = pos + new Vector3(0, 0, 0.1f);
+                ovGO.transform.position = pos + new Vector3(0, 0, 0.1f);
                 ovGO.transform.localScale = Vector3.one * vScale;
 
-                var osr         = ovGO.AddComponent<SpriteRenderer>();
-                osr.sprite      = TextureUtils.WhiteCellSprite;
-                osr.color       = Color.clear;
+                var osr = ovGO.AddComponent<SpriteRenderer>();
+                osr.sprite = TextureUtils.WhiteCellSprite;
+                osr.color = Color.clear;
                 osr.sortingOrder = 2;
                 _overlaySR[c, r] = osr;
             }
@@ -307,8 +314,8 @@ public class GridManager : MonoBehaviour
 
         // Animate cells out (staggered)
         float maxDelay = 0f;
-        float vScale   = Constants.CELL_SIZE * Constants.CELL_VISUAL_RATIO;
-        int   idx      = 0;
+        float vScale = Constants.CELL_SIZE * Constants.CELL_VISUAL_RATIO;
+        int idx = 0;
 
         foreach (var cell in toClear)
         {
@@ -328,11 +335,11 @@ public class GridManager : MonoBehaviour
             seq.Join(sr.DOFade(0f, Constants.ANIM_CLEAR_FADE));
             seq.AppendCallback(() =>
             {
-                _occupied[cc, rr]  = false;
+                _occupied[cc, rr] = false;
                 _cellColor[cc, rr] = default;
-                sr.sprite  = TextureUtils.WhiteCellSprite;
-                var c2     = Constants.CellEmptyColor;
-                sr.color   = c2;
+                sr.sprite = TextureUtils.WhiteCellSprite;
+                var c2 = Constants.CellEmptyColor;
+                sr.color = c2;
                 sr.transform.localScale = Vector3.one * vScale;
             });
 

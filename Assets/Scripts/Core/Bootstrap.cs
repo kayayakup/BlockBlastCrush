@@ -34,14 +34,14 @@ public class Bootstrap : MonoBehaviour
         SetupEventSystem();
 
         // ── Create manager GameObjects ─────────────────────────────────────
-        var poolMgr   = Spawn<PoolManager>   ("PoolManager");
-        var scoreMgr  = Spawn<ScoreManager>  ("ScoreManager");
-        var gridMgr   = Spawn<GridManager>   ("GridManager");
-        var uiMgr     = Spawn<UIManager>     ("UIManager");
-        var spawner   = Spawn<BlockSpawner>  ("BlockSpawner");
-        var input     = Spawn<InputHandler>  ("InputHandler");
-        var gameMgr   = Spawn<GameManager>   ("GameManager");
-        var effectMgr = Spawn<EffectManager> ("EffectManager");
+        var poolMgr     = Spawn<PoolManager>   ("PoolManager");
+        var scoreMgr    = Spawn<ScoreManager>  ("ScoreManager");
+        var gridMgr     = Spawn<GridManager>   ("GridManager");
+        var uiMgr       = Spawn<UIManager>     ("UIManager");
+        var spawner     = Spawn<BlockSpawner>  ("BlockSpawner");
+        var input       = Spawn<InputHandler>  ("InputHandler");
+        var gameMgr     = Spawn<GameManager>   ("GameManager");
+        var effectMgr   = Spawn<EffectManager> ("EffectManager");
 
         // AudioManager must already exist in the scene with clips assigned via Inspector.
         var audioMgr  = FindAnyObjectByType<AudioManager>();
@@ -56,8 +56,8 @@ public class Bootstrap : MonoBehaviour
         spawner  .Initialize();
         input    .Initialize();
         audioMgr?.Initialize();   // safe — AudioManager inits itself in Awake too
-        effectMgr.Initialize();
         gameMgr  .Initialize();
+        effectMgr.Initialize();
     }
 
     // ── Camera ────────────────────────────────────────────────────────────────

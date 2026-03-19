@@ -19,27 +19,27 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     // ── Component references ───────────────────────────────────────────────────
-    private Canvas        _canvas;
-    private TMP_Text      _scoreTMP;
-    private TMP_Text      _bestTMP;
-    private Image         _crownImg;
-    private Image         _gearImg;
+    private Canvas _canvas;
+    private TMP_Text _scoreTMP;
+    private TMP_Text _bestTMP;
+    private Image _crownImg;
+    private Image _gearImg;
 
     // Score pop-up
     private RectTransform _popupRT;
-    private TMP_Text      _popupTMP;
-    private CanvasGroup   _popupCG;
+    private TMP_Text _popupTMP;
+    private CanvasGroup _popupCG;
 
     // Game-over panel
-    private GameObject  _gameOverPanel;
-    private TMP_Text    _gameOverScoreTMP;
+    private GameObject _gameOverPanel;
+    private TMP_Text _gameOverScoreTMP;
 
     // World-space background
     private GameObject _bgObj;
 
     // Safe area
     private RectTransform _safeAreaRT;
-    private Rect          _lastSafeArea;
+    private Rect _lastSafeArea;
 
     void Awake() => Instance = this;
 
@@ -134,12 +134,12 @@ public class UIManager : MonoBehaviour
         _bgObj.transform.position = new Vector3(0f, 0f, 1f);
 
         // Tall sprite that fills the camera view completely
-        float camH  = Constants.CAMERA_ORTHO_SIZE * 2f;
-        float camW  = camH * Screen.width / Mathf.Max(Screen.height, 1);
+        float camH = Constants.CAMERA_ORTHO_SIZE * 2f;
+        float camW = camH * Screen.width / Mathf.Max(Screen.height, 1);
         _bgObj.transform.localScale = new Vector3(camW + 1f, camH + 1f, 1f);
 
-        var sr          = _bgObj.AddComponent<SpriteRenderer>();
-        sr.sprite       = TextureUtils.CreateRoundedRect(4, 4, 0, Constants.BgColor);
+        var sr = _bgObj.AddComponent<SpriteRenderer>();
+        sr.sprite = TextureUtils.CreateRoundedRect(4, 4, 0, Constants.BgColor);
         sr.sortingOrder = -10;
 
         // Tray-area strip (slightly darker at bottom)
@@ -149,13 +149,13 @@ public class UIManager : MonoBehaviour
             (Constants.TRAY_Y - Constants.CAMERA_ORTHO_SIZE) / camH * 2f + 0.5f - 0.08f, -0.05f);
 
         float stripH = (Constants.CAMERA_ORTHO_SIZE + Constants.TRAY_Y - 1.1f) / camH * (-1f);
-        var   trayGO = new GameObject("TrayStrip");
+        var trayGO = new GameObject("TrayStrip");
         trayGO.transform.SetParent(transform);
         trayGO.transform.position = new Vector3(0f, Constants.TRAY_Y - 0.9f, 0.8f);
         trayGO.transform.localScale = new Vector3(camW + 1f, Mathf.Max(0.1f, (-Constants.TRAY_Y + Constants.CAMERA_ORTHO_SIZE - 0.5f) * 2f), 1f);
 
         var tsr = trayGO.AddComponent<SpriteRenderer>();
-        tsr.sprite       = TextureUtils.CreateRoundedRect(4, 4, 0, Constants.TrayBgColor);
+        tsr.sprite = TextureUtils.CreateRoundedRect(4, 4, 0, Constants.TrayBgColor);
         tsr.sortingOrder = -9;
     }
 
@@ -163,14 +163,14 @@ public class UIManager : MonoBehaviour
 
     private void BuildCanvas()
     {
-        _canvas              = gameObject.AddComponent<Canvas>();
-        _canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
+        _canvas = gameObject.AddComponent<Canvas>();
+        _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         _canvas.sortingOrder = 100;
 
-        var scaler                 = gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        var scaler = gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1080f, 2400f);
-        scaler.matchWidthOrHeight  = 0.5f;
+        scaler.matchWidthOrHeight = 0.5f;
 
         gameObject.AddComponent<GraphicRaycaster>();
     }
@@ -219,7 +219,7 @@ public class UIManager : MonoBehaviour
         AnchorStretchTop(barRT, 0f, 104f);
 
         // Subtle background
-        var barImg   = barGO.AddComponent<Image>();
+        var barImg = barGO.AddComponent<Image>();
         barImg.color = Constants.TopBarColor;
         barImg.sprite = TextureUtils.CreateRoundedRect(4, 4, 0, Color.white);
 
@@ -228,9 +228,9 @@ public class UIManager : MonoBehaviour
         var crownRT = crownGO.GetComponent<RectTransform>();
         crownRT.anchorMin = crownRT.anchorMax = crownRT.pivot = new Vector2(0f, 0.5f);
         crownRT.anchoredPosition = new Vector2(22f, 0f);
-        crownRT.sizeDelta        = new Vector2(52f, 40f);
-        _crownImg         = crownGO.AddComponent<Image>();
-        _crownImg.sprite  = TextureUtils.CrownSprite;
+        crownRT.sizeDelta = new Vector2(52f, 40f);
+        _crownImg = crownGO.AddComponent<Image>();
+        _crownImg.sprite = TextureUtils.CrownSprite;
         _crownImg.preserveAspect = true;
 
         // ── Best-score label ──────────────────────────────────────────────────
@@ -238,7 +238,7 @@ public class UIManager : MonoBehaviour
         var bestRT = bestGO.GetComponent<RectTransform>();
         bestRT.anchorMin = bestRT.anchorMax = bestRT.pivot = new Vector2(0f, 0.5f);
         bestRT.anchoredPosition = new Vector2(80f, 0f);
-        bestRT.sizeDelta        = new Vector2(280f, 80f);
+        bestRT.sizeDelta = new Vector2(280f, 80f);
         _bestTMP = bestGO.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(_bestTMP, "0", 44f, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
@@ -247,10 +247,10 @@ public class UIManager : MonoBehaviour
         var gearRT = gearGO.GetComponent<RectTransform>();
         gearRT.anchorMin = gearRT.anchorMax = gearRT.pivot = new Vector2(1f, 0.5f);
         gearRT.anchoredPosition = new Vector2(-22f, 0f);
-        gearRT.sizeDelta        = new Vector2(44f, 44f);
-        _gearImg         = gearGO.AddComponent<Image>();
-        _gearImg.sprite  = TextureUtils.GearSprite;
-        _gearImg.color   = new Color(0.85f, 0.90f, 1f, 0.90f);
+        gearRT.sizeDelta = new Vector2(44f, 44f);
+        _gearImg = gearGO.AddComponent<Image>();
+        _gearImg.sprite = TextureUtils.GearSprite;
+        _gearImg.color = new Color(0.85f, 0.90f, 1f, 0.90f);
         _gearImg.preserveAspect = true;
 
         // Gear ikonuna Button ekle
@@ -266,9 +266,9 @@ public class UIManager : MonoBehaviour
         var scoreGO = NewUIGO("ScoreLabel", _safeAreaRT);
         var scoreRT = scoreGO.GetComponent<RectTransform>();
         scoreRT.anchorMin = scoreRT.anchorMax = new Vector2(0.5f, 1f);
-        scoreRT.pivot     = new Vector2(0.5f, 1f);
+        scoreRT.pivot = new Vector2(0.5f, 1f);
         scoreRT.anchoredPosition = new Vector2(0f, -130f);
-        scoreRT.sizeDelta        = new Vector2(600f, 130f);
+        scoreRT.sizeDelta = new Vector2(600f, 130f);
         _scoreTMP = scoreGO.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(_scoreTMP, "0", 108f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
     }
@@ -288,17 +288,17 @@ public class UIManager : MonoBehaviour
 
     private void BuildScorePopup()
     {
-        var go   = NewUIGO("ScorePopup", _canvas.transform);
+        var go = NewUIGO("ScorePopup", _canvas.transform);
         _popupRT = go.GetComponent<RectTransform>();
         _popupRT.anchorMin = _popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-        _popupRT.pivot     = new Vector2(0.5f, 0.5f);
+        _popupRT.pivot = new Vector2(0.5f, 0.5f);
         _popupRT.sizeDelta = new Vector2(340f, 90f);
         _popupRT.anchoredPosition = new Vector2(0f, 80f);
 
         _popupTMP = go.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(_popupTMP, "", 58f, new Color(1f, 0.92f, 0.15f), FontStyles.Bold, TextAlignmentOptions.Center);
 
-        _popupCG       = go.AddComponent<CanvasGroup>();
+        _popupCG = go.AddComponent<CanvasGroup>();
         _popupCG.alpha = 0f;
     }
 
@@ -308,12 +308,12 @@ public class UIManager : MonoBehaviour
     {
         // Full-screen dark overlay
         _gameOverPanel = NewUIGO("GameOverPanel", _canvas.transform);
-        var panelRT    = _gameOverPanel.GetComponent<RectTransform>();
+        var panelRT = _gameOverPanel.GetComponent<RectTransform>();
         panelRT.anchorMin = Vector2.zero;
         panelRT.anchorMax = Vector2.one;
         panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
 
-        var panelImg  = _gameOverPanel.AddComponent<Image>();
+        var panelImg = _gameOverPanel.AddComponent<Image>();
         panelImg.color = new Color(0f, 0.02f, 0.08f, 0.88f);
 
         var cg = _gameOverPanel.AddComponent<CanvasGroup>();
@@ -323,22 +323,22 @@ public class UIManager : MonoBehaviour
         var cardGO = NewUIGO("Card", _gameOverPanel.transform);
         var cardRT = cardGO.GetComponent<RectTransform>();
         cardRT.anchorMin = cardRT.anchorMax = new Vector2(0.5f, 0.5f);
-        cardRT.pivot     = new Vector2(0.5f, 0.5f);
+        cardRT.pivot = new Vector2(0.5f, 0.5f);
         cardRT.sizeDelta = new Vector2(560f, 420f);
         cardRT.anchoredPosition = Vector2.zero;
 
-        var cardImg    = cardGO.AddComponent<Image>();
+        var cardImg = cardGO.AddComponent<Image>();
         cardImg.sprite = TextureUtils.CreateRoundedRect(100, 100, 18, Color.white);
-        cardImg.color  = new Color(0.055f, 0.200f, 0.420f, 1f);
-        cardImg.type   = Image.Type.Sliced;
+        cardImg.color = new Color(0.055f, 0.200f, 0.420f, 1f);
+        cardImg.type = Image.Type.Sliced;
 
         // "GAME OVER" title
         var titleGO = NewUIGO("Title", cardGO.transform);
         var titleRT = titleGO.GetComponent<RectTransform>();
         titleRT.anchorMin = titleRT.anchorMax = new Vector2(0.5f, 1f);
-        titleRT.pivot     = new Vector2(0.5f, 1f);
+        titleRT.pivot = new Vector2(0.5f, 1f);
         titleRT.anchoredPosition = new Vector2(0f, -40f);
-        titleRT.sizeDelta        = new Vector2(500f, 90f);
+        titleRT.sizeDelta = new Vector2(500f, 90f);
         var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(titleTMP, "GAME OVER", 62f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
@@ -346,9 +346,9 @@ public class UIManager : MonoBehaviour
         var fGO = NewUIGO("FinalScore", cardGO.transform);
         var fRT = fGO.GetComponent<RectTransform>();
         fRT.anchorMin = fRT.anchorMax = new Vector2(0.5f, 0.5f);
-        fRT.pivot     = new Vector2(0.5f, 0.5f);
+        fRT.pivot = new Vector2(0.5f, 0.5f);
         fRT.anchoredPosition = new Vector2(0f, 20f);
-        fRT.sizeDelta        = new Vector2(480f, 100f);
+        fRT.sizeDelta = new Vector2(480f, 100f);
         _gameOverScoreTMP = fGO.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(_gameOverScoreTMP, "SCORE   0\nBEST   0", 36f,
             new Color(0.8f, 0.9f, 1f), FontStyles.Normal, TextAlignmentOptions.Center);
@@ -357,20 +357,20 @@ public class UIManager : MonoBehaviour
         var btnGO = NewUIGO("RestartBtn", cardGO.transform);
         var btnRT = btnGO.GetComponent<RectTransform>();
         btnRT.anchorMin = btnRT.anchorMax = new Vector2(0.5f, 0f);
-        btnRT.pivot     = new Vector2(0.5f, 0f);
+        btnRT.pivot = new Vector2(0.5f, 0f);
         btnRT.anchoredPosition = new Vector2(0f, 40f);
-        btnRT.sizeDelta        = new Vector2(280f, 72f);
+        btnRT.sizeDelta = new Vector2(280f, 72f);
 
-        var btnImg    = btnGO.AddComponent<Image>();
+        var btnImg = btnGO.AddComponent<Image>();
         btnImg.sprite = TextureUtils.CreateRoundedRect(100, 100, 22, Color.white);
-        btnImg.color  = new Color(0.18f, 0.72f, 0.30f);
-        btnImg.type   = Image.Type.Sliced;
+        btnImg.color = new Color(0.18f, 0.72f, 0.30f);
+        btnImg.type = Image.Type.Sliced;
 
-        var btn    = btnGO.AddComponent<Button>();
+        var btn = btnGO.AddComponent<Button>();
         btn.targetGraphic = btnImg;
         var cc = btn.colors;
         cc.highlightedColor = new Color(0.26f, 0.86f, 0.40f);
-        cc.pressedColor     = new Color(0.10f, 0.52f, 0.20f);
+        cc.pressedColor = new Color(0.10f, 0.52f, 0.20f);
         btn.colors = cc;
         btn.onClick.AddListener(() => GameManager.Instance.RestartGame());
 
@@ -397,19 +397,19 @@ public class UIManager : MonoBehaviour
 
     private static void AnchorStretchTop(RectTransform rt, float y, float height)
     {
-        rt.anchorMin       = new Vector2(0f, 1f);
-        rt.anchorMax       = new Vector2(1f, 1f);
-        rt.pivot           = new Vector2(0.5f, 1f);
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
         rt.anchoredPosition = new Vector2(0f, y);
-        rt.sizeDelta       = new Vector2(0f, height);
+        rt.sizeDelta = new Vector2(0f, height);
     }
 
     private static void ApplyTextStyle(TMP_Text t, string text, float size, Color color,
                                        FontStyles style, TextAlignmentOptions align)
     {
-        t.text      = text;
-        t.fontSize  = size;
-        t.color     = color;
+        t.text = text;
+        t.fontSize = size;
+        t.color = color;
         t.fontStyle = style;
         t.alignment = align;
         t.enableWordWrapping = false;

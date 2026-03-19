@@ -1,4 +1,4 @@
-// ── EffectManager.cs ──────────────────────────────────────────────────────────
+﻿// ── EffectManager.cs ──────────────────────────────────────────────────────────
 // Place in: Assets/Scripts/Core/EffectManager.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -88,7 +88,7 @@ public class EffectManager : MonoBehaviour
         if (prefab != null)
         {
             GameObject effect = Instantiate(prefab, position, Quaternion.identity);
-            Destroy(effect, 1.5f);
+            Destroy(effect, 3f);
         }
     }
 }

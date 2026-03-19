@@ -36,13 +36,13 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip clipGameOver;
 
     [Header("Volume Settings")]
-    [Range(0f, 1f)][SerializeField] private float volumePickup = 0.80f;
-    [Range(0f, 1f)][SerializeField] private float volumePlace = 0.85f;
-    [Range(0f, 1f)][SerializeField] private float volumeReturn = 0.80f;
-    [Range(0f, 1f)][SerializeField] private float volumeClear = 1.00f;
-    [Range(0f, 1f)][SerializeField] private float volumeScore = 0.75f;
-    [Range(0f, 1f)][SerializeField] private float volumeSpawn = 1.00f;
-    [Range(0f, 1f)][SerializeField] private float volumeGameOver = 0.85f;
+    [Range(0f, 1f)] [SerializeField] private float volumePickup    = 0.80f;
+    [Range(0f, 1f)] [SerializeField] private float volumePlace     = 0.85f;
+    [Range(0f, 1f)] [SerializeField] private float volumeReturn    = 0.80f;
+    [Range(0f, 1f)] [SerializeField] private float volumeClear     = 1.00f;
+    [Range(0f, 1f)] [SerializeField] private float volumeScore     = 0.75f;
+    [Range(0f, 1f)] [SerializeField] private float volumeSpawn     = 0.65f;
+    [Range(0f, 1f)] [SerializeField] private float volumeGameOver  = 0.85f;
 
     // ── Audio Sources ─────────────────────────────────────────────────────────
     private AudioSource _sfxSource;
@@ -70,13 +70,13 @@ public class AudioManager : MonoBehaviour
     {
         if (_sfxSource != null) return; // already initialised
 
-        _sfxSource = gameObject.AddComponent<AudioSource>();
+        _sfxSource             = gameObject.AddComponent<AudioSource>();
         _sfxSource.playOnAwake = false;
-        _sfxSource.volume = 1f;
+        _sfxSource.volume      = 1f;
 
-        _bgSource = gameObject.AddComponent<AudioSource>();
-        _bgSource.playOnAwake = false;
-        _bgSource.volume = 0.85f;
+        _bgSource              = gameObject.AddComponent<AudioSource>();
+        _bgSource.playOnAwake  = false;
+        _bgSource.volume       = 0.85f;
 
         bool savedMute = PlayerPrefs.GetInt("BlockPuzzle_Muted", 0) == 1;
         _sfxSource.mute = savedMute;

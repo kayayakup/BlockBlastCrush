@@ -15,7 +15,7 @@ public static class Constants
     // ── Grid dimensions (cell count only) ────────────────────────────────────
     public const int GRID_COLS = 8;
     public const int GRID_ROWS = 8;
-    public const int TRAY_COUNT = 6;
+    public const int TRAY_COUNT = 3;
 
     // ── Scoring ───────────────────────────────────────────────────────────────
     public const int POINTS_PER_CELL = 1;
@@ -27,7 +27,7 @@ public static class Constants
     public const float ANIM_CLEAR_DELAY  = 0.022f;
     public const float ANIM_SPAWN        = 0.30f;
     public const float ANIM_PULSE        = 0.26f;
-    public const float ANIM_BATCH_DELAY  = 0.0f;
+    public const float ANIM_BATCH_DELAY  = 0.40f;
     public const float CELL_VISUAL_RATIO = 0.87f;  // sprite fills 87% of cell slot
 
     // ── Colours ───────────────────────────────────────────────────────────────

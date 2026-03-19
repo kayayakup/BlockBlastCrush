@@ -12,24 +12,25 @@ public class BlockSpawner : MonoBehaviour
 {
     public static BlockSpawner Instance { get; private set; }
 
-    private Block[] _trayBlocks;
+    private Block[]     _trayBlocks;
     private BlockData[] _trayData;
-    private Vector3[] _slotPositions;
-    private bool[] _slotFilled;
-    private int _filledCount;
-    private Tween _batchDelayTween;
+    private Vector3[]   _slotPositions;
+    private bool[]      _slotFilled;
+    private int         _filledCount;
+    private Tween       _batchDelayTween;
 
-    // Rare shapes: normal T, normal Z, 3'lü L, 4'lü L
-    // In BlockDefinitions these correspond to indices 10–29.
-    private static HashSet<Vector2Int[]> _rareShapes;
+    // Rarity configuration: shapes that should appear less often
+    private static readonly HashSet<Vector2Int[]> _rareShapes;
     private const float RARE_ACCEPT_PROBABILITY = 0.2f; // 20% chance to keep a rare shape
 
-    // Lazy initialisation of the rare‑shape set
-    private static void EnsureRareShapesInitialized()
+    static BlockSpawner()
     {
-        if (_rareShapes != null) return;
+        // Mark shapes with indices 10–29 as rare:
+        // 10–13 : 3'lü "L"
+        // 14–21 : 4'lü "L"
+        // 22–25 : normal "T"
+        // 26–29 : normal "Z"
         _rareShapes = new HashSet<Vector2Int[]>();
-        // Indices 10 through 29 are the rare ones (see BlockDefinitions)
         for (int i = 10; i <= 29; i++)
         {
             _rareShapes.Add(BlockDefinitions.AllShapes[i]);
@@ -43,27 +44,16 @@ public class BlockSpawner : MonoBehaviour
     public void Initialize()
     {
         int n = Constants.TRAY_COUNT;
-        _trayBlocks = new Block[n];
-        _trayData = new BlockData[n];
+        _trayBlocks    = new Block[n];
+        _trayData      = new BlockData[n];
         _slotPositions = new Vector3[n];
-        _slotFilled = new bool[n];
+        _slotFilled    = new bool[n];
 
-        // Compute 2x3 grid positions (3 columns, 2 rows)
-        float colSpacing = Constants.TRAY_SLOT_SPACING;
-        float rowSpacing = LayoutConfig.TrayRowSpacing;
-        float startX = -1.0f * colSpacing; // (3-1) * 0.5 * spacing = 1.0 * spacing
-        
+        // Compute evenly-spaced horizontal slot positions
+        float spacing = Constants.TRAY_SLOT_SPACING;
+        float startX  = -(n - 1) * 0.5f * spacing;
         for (int i = 0; i < n; i++)
-        {
-            int row = i / 3; // 0 for first 3, 1 for next 3
-            int col = i % 3; // 0, 1, 2
-            
-            float x = startX + col * colSpacing;
-            // First row (i=0,1,2) at Y, second row (i=3,4,5) at Y - rowSpacing
-            float y = Constants.TRAY_Y - row * rowSpacing;
-            
-            _slotPositions[i] = new Vector3(x, y, 0f);
-        }
+            _slotPositions[i] = new Vector3(startX + i * spacing, Constants.TRAY_Y, 0f);
 
         // Pre-create Block GameObjects (reused for the whole session)
         for (int i = 0; i < n; i++)
@@ -80,8 +70,8 @@ public class BlockSpawner : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    public Block GetBlock(int slot) => _trayBlocks[slot];
-    public int FilledCount => _filledCount;
+    public Block     GetBlock(int slot)     => _trayBlocks[slot];
+    public int       FilledCount            => _filledCount;
 
     /// <summary>BlockData for every still-available tray slot.</summary>
     public BlockData[] GetAvailableData()
@@ -139,8 +129,6 @@ public class BlockSpawner : MonoBehaviour
     /// </summary>
     private BlockData GetRandomWithRarity(float occ, int maxAttempts = 15)
     {
-        EnsureRareShapesInitialized();
-
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             var data = BlockDefinitions.GetRandom(occ);
@@ -193,14 +181,14 @@ public class BlockSpawner : MonoBehaviour
 
         for (int i = 0; i < Constants.TRAY_COUNT; i++)
         {
-            var data = candidates[i];
-            _trayData[i] = data;
+            var data       = candidates[i];
+            _trayData[i]   = data;
             _slotFilled[i] = true;
             _filledCount++;
 
-            int capturedI = i;
-            var capturedD = data;
-            float delay = i * 0.06f;
+            int   capturedI = i;
+            var   capturedD = data;
+            float delay     = i * 0.06f;
             DOVirtual.DelayedCall(delay, () => {
                 _trayBlocks[capturedI].Setup(capturedD, capturedI, _slotPositions[capturedI]);
                 if (capturedI == 0) AudioManager.Instance?.PlaySpawn();
