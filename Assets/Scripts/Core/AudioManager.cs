@@ -30,6 +30,12 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip clipLineClear1;
     [SerializeField] private AudioClip clipLineClear2;
 
+    [Header("New Feedback Sounds")]
+    public AudioClip soundGood;          // 1 line
+    public AudioClip soundAmazing;       // 2 lines
+    public AudioClip soundUnbelievable;  // 3+ lines
+    public AudioClip soundCombo;         // Consecutive clears
+
     [Header("UI / Feedback")]
     [SerializeField] private AudioClip clipScore;
     [SerializeField] private AudioClip clipSpawn;
@@ -114,6 +120,23 @@ public class AudioManager : MonoBehaviour
     public void PlayLineClear(int lines = 1)
     {
         var clip = (lines >= 2 && clipLineClear2 != null) ? clipLineClear2 : clipLineClear1;
+        if (clip != null) _sfxSource.PlayOneShot(clip, volumeClear);
+    }
+
+    public void PlayFeedbackSound(int lines, bool isCombo)
+    {
+        AudioClip clip = null;
+        if (isCombo)
+        {
+            clip = soundCombo;
+        }
+        else
+        {
+            if (lines == 1) clip = soundGood;
+            else if (lines == 2) clip = soundAmazing;
+            else if (lines >= 3) clip = soundUnbelievable;
+        }
+
         if (clip != null) _sfxSource.PlayOneShot(clip, volumeClear);
     }
 

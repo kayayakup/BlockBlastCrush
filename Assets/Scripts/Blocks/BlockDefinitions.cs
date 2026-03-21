@@ -7,14 +7,14 @@ public static class BlockDefinitions
 {
     private static readonly Color[] Palette =
     {
-        new Color(0.55f, 0.28f, 0.90f),   // purple
-        new Color(0.15f, 0.76f, 0.32f),   // green
-        new Color(0.96f, 0.45f, 0.08f),   // orange
-        new Color(0.10f, 0.72f, 0.88f),   // cyan
-        new Color(0.93f, 0.73f, 0.05f),   // yellow
-        new Color(0.95f, 0.22f, 0.28f),   // red
-        new Color(0.20f, 0.50f, 0.95f),   // royal blue
-        new Color(0.95f, 0.30f, 0.70f),   // pink
+        new Color(0.96f, 0.45f, 0.85f),   // magenta-pink
+        new Color(0.40f, 0.85f, 0.55f),   // mint green
+        new Color(1.00f, 0.60f, 0.28f),   // tangerine orange
+        new Color(0.30f, 0.82f, 0.95f),   // sky cyan
+        new Color(1.00f, 0.88f, 0.30f),   // sunny yellow
+        new Color(1.00f, 0.40f, 0.45f),   // coral red
+        new Color(0.38f, 0.58f, 0.98f),   // soft blue
+        new Color(0.95f, 0.50f, 0.78f),   // bubblegum pink
     };
 
     // =========================================================================

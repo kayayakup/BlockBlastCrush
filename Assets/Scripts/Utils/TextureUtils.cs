@@ -12,7 +12,7 @@ public static class TextureUtils
     private const int RESOLUTION = 512;
 
     public static Sprite WhiteCellSprite =>
-        _whiteCellSprite ?? (_whiteCellSprite = CreateRoundedRectSprite(RESOLUTION, RESOLUTION, 72f, Color.white));
+        _whiteCellSprite ?? (_whiteCellSprite = CreateRoundedRectSprite(RESOLUTION, RESOLUTION, 2f, Color.white));
 
     public static Sprite CrownSprite => _crownSprite ?? (_crownSprite = BuildCrownSprite());
     public static Sprite GearSprite => _gearSprite ?? (_gearSprite = BuildGearSprite());
@@ -33,20 +33,23 @@ public static class TextureUtils
         var px = new Color[W * H];
 
         // ── Style Variations (Configure BEFORE loop) ─────────────────────────
-        float R = 68f;      // Default Corner Radius
-        float B = 52f;      // Default Bevel size
-        float G = 0.6f;     // Default Gloss intensity
+        float R = 2f;      // Square Corner Radius
+        float B = 48f;      // Default Bevel size
+        float G = 0.45f;     // Default Gloss intensity
+        
+        // Overriding all styles to be square as requested
+        R = 2f; 
         
         switch (style)
         {
-            case 1: R = 20f;  break; // Sharp
-            case 2: R = 200f; break; // Circular
-            case 3: R = 40f;  break; // Industrial
-            case 4: R = 60f;  break; // Glowing
-            case 5: R = 80f;  break; // Patterned
-            case 6: R = 30f;  break; // Crystal
-            case 7: R = 150f; break; // Modern
-            case 8: R = 100f; break; // Playful
+            case 1: R = 0f;  break; // Sharp
+            case 2: R = 15f; break; // Slightly rounded
+            case 3: R = 2f;  break; // Industrial
+            case 4: R = 4f;  break; // Glowing
+            case 5: R = 2f;  break; // Patterned
+            case 6: R = 2f;  break; // Crystal
+            case 7: R = 2f;  break; // Modern
+            case 8: R = 4f;  break; // Playful
             case 9: R = 0f;   break; // Square
         }
 

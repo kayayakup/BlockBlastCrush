@@ -98,8 +98,8 @@ public class Block : MonoBehaviour
 
         DOTween.Kill(transform);
         DOTween.Sequence()
-               .Append(transform.DOMove(_trayPos, 0.22f).SetEase(Ease.OutQuad))
-               .Join(transform.DOScale(_trayScale, 0.22f).SetEase(Ease.OutBack));
+               .Append(transform.DOMove(_trayPos, 0.08f).SetEase(Ease.OutQuad))
+               .Join(transform.DOScale(_trayScale, 0.08f).SetEase(Ease.OutBack));
     }
 
     /// <summary>
@@ -149,11 +149,18 @@ public class Block : MonoBehaviour
     public void RefreshStyle()
     {
         if (Data == null) return;
-        
+
         var newSprite = TextureUtils.GetBlockSprite(Data.Color);
         foreach (var sr in _cellRenderers)
         {
             sr.sprite = newSprite;
+        }
+    }
+    public void SyncColorWithTheme(Color c)
+    {
+        foreach (var sr in _cellRenderers)
+        {
+            sr.color = c;
         }
     }
 
@@ -195,7 +202,7 @@ public class Block : MonoBehaviour
     private void ResizeCollider()
     {
         float cs  = Constants.CELL_SIZE;
-        float pad = cs * 5f;   // extra touch area for mobile comfort
+        float pad = cs * 2.5f;   // significantly smaller touch area as requested
         _col.size   = new Vector2(Data.BBoxWidth  * cs + pad, Data.BBoxHeight * cs + pad);
         _col.offset = Vector2.zero;
     }

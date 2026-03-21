@@ -22,6 +22,7 @@ public static class LayoutConfig
     // ── Tray ──────────────────────────────────────────────────────────────────
     public static float TrayY         { get; private set; }
     public static float TraySlotSpacing { get; private set; }
+    public static float TrayRowSpacing { get; private set; }
     public static float TrayScale     { get; private set; }
     public static float DragOffsetY   { get; private set; }
 
@@ -76,15 +77,18 @@ public static class LayoutConfig
         float gridWorldH   = CellSize * Constants.GRID_ROWS;
         float midUsable    = (usableTop + usableBot) * 0.5f;
         GridCenterX = 0f;
-        GridCenterY = midUsable;
+        GridCenterY = midUsable + 2.0f;
 
-        // ── Tray — sits in the bottom strip, centred vertically in that strip
-        TrayY = -OrthoSize + trayWorldH * 1.1f;
+        // ── Tray — sits in the bottom strip, arranged in 2 rows of 3
+        TrayY = -OrthoSize + trayWorldH * 1.35f + 3.5f;
 
-        // Tray slot spacing: the three slots span ~80% of world width
-        TraySlotSpacing = WorldWidth * 0.65f / (Constants.TRAY_COUNT - 1);
+        // Tray slot spacing: increased to ~85% of width to open up space
+        TraySlotSpacing = WorldWidth * 0.65f / (3 - 1); 
         // Clamp to sensible range
-        TraySlotSpacing = Mathf.Clamp(TraySlotSpacing, CellSize * 2.5f, CellSize * 5f);
+        TraySlotSpacing = Mathf.Clamp(TraySlotSpacing, CellSize * 2.5f, CellSize * 5.5f);
+
+        // Vertical spacing between rows increased for more spacing
+        TrayRowSpacing = trayWorldH * 0.75f;
 
         // Tray blocks are drawn at a larger scale for easier touch interaction
         TrayScale = Mathf.Clamp(WorldWidth * 0.14f / (CellSize * 2.5f), 0.50f, 0.75f);

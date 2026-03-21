@@ -11,8 +11,8 @@ public class GoogleAdMobController : MonoBehaviour
     private InterstitialAd interstitial;
 
     // Replace with your real Ad Unit IDs
-    private string bannerID = "";
-    private string interstitialID = "";
+    private string bannerID = "ca-app-pub-3940256099942544/6300978111";
+    private string interstitialID = "ca-app-pub-3940256099942544/1033173712";
 
     private void Awake()
     {

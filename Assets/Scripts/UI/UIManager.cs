@@ -30,6 +30,11 @@ public class UIManager : MonoBehaviour
     private TMP_Text _popupTMP;
     private CanvasGroup _popupCG;
 
+    // Feedback messages (GOOD, AMAZING, etc.)
+    private RectTransform _feedbackRT;
+    private TMP_Text _feedbackTMP;
+    private CanvasGroup _feedbackCG;
+
     // Game-over panel
     private GameObject _gameOverPanel;
     private TMP_Text _gameOverScoreTMP;
@@ -52,6 +57,7 @@ public class UIManager : MonoBehaviour
         BuildSafeArea();
         BuildTopBar();
         BuildScorePopup();
+        BuildFeedbackPopup();
         BuildGameOverPanel();
 
         ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
@@ -59,6 +65,52 @@ public class UIManager : MonoBehaviour
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
+
+    public void ShowFeedback(string text, int type)
+    {
+        // 0: Good, 1: Amazing, 2: Unbelievable, 3: Combo
+        DOTween.Kill(_feedbackCG);
+        DOTween.Kill(_feedbackRT);
+
+        _feedbackTMP.text = text;
+        _feedbackCG.alpha = 1f;
+        _feedbackRT.anchoredPosition = new Vector2(0f, 0f);
+        _feedbackRT.localScale = Vector3.one * 0.5f;
+
+        // Apply Gradients
+        _feedbackTMP.enableVertexGradient = true;
+        Color cTop, cBottom;
+        
+        switch(type)
+        {
+            case 0: // GOOD - Greenish
+                cTop = new Color(0.1f, 1f, 0.4f);
+                cBottom = new Color(0.05f, 0.5f, 0.2f);
+                break;
+            case 1: // AMAZING - Blueish
+                cTop = new Color(0.2f, 0.6f, 1f);
+                cBottom = new Color(0.05f, 0.2f, 0.6f);
+                break;
+            case 2: // UNBELIEVABLE - Purple/Pink
+                cTop = new Color(1f, 0.2f, 0.8f);
+                cBottom = new Color(0.5f, 0.05f, 0.4f);
+                break;
+            case 3: // COMBO - Orange/Gold
+            default:
+                cTop = new Color(1f, 0.8f, 0f);
+                cBottom = new Color(0.8f, 0.4f, 0f);
+                break;
+        }
+
+        _feedbackTMP.colorGradient = new VertexGradient(cTop, cTop, cBottom, cBottom);
+
+        DOTween.Sequence()
+               .Append(_feedbackRT.DOScale(1.8f, 0.22f).SetEase(Ease.OutBack))
+               .Append(_feedbackRT.DOScale(1.4f, 0.12f))
+               .AppendInterval(0.70f)
+               .Append(_feedbackCG.DOFade(0f, 0.30f))
+               .Join(_feedbackRT.DOAnchorPosY(100f, 0.30f));
+    }
 
     public void ShowGameOver(int finalScore)
     {
@@ -81,6 +133,15 @@ public class UIManager : MonoBehaviour
         _gameOverPanel.SetActive(false);
     }
 
+    public void UpdateBackgroundColor(Color c)
+    {
+        if (_bgObj != null)
+        {
+            var sr = _bgObj.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.color = c;
+        }
+    }
+
     // ── Score event ───────────────────────────────────────────────────────────
 
     private void HandleScoreChanged(int current, int best, int delta)
@@ -89,7 +150,7 @@ public class UIManager : MonoBehaviour
         if (delta >= Constants.POINTS_PER_LINE)
         {
             ShowScorePopup($"+{delta}");
-            AudioManager.Instance?.PlayScore();
+            // AudioManager.Instance?.PlayScore(); // This is already called in ScoreManager or AudioManager elsewhere?
         }
     }
 
@@ -139,7 +200,7 @@ public class UIManager : MonoBehaviour
         _bgObj.transform.localScale = new Vector3(camW + 1f, camH + 1f, 1f);
 
         var sr = _bgObj.AddComponent<SpriteRenderer>();
-        sr.sprite = TextureUtils.CreateRoundedRect(4, 4, 0, Constants.BgColor);
+        sr.sprite = TextureUtils.CreateRoundedRect(4, 4, 0, Color.clear);
         sr.sortingOrder = -10;
 
         // Tray-area strip (slightly darker at bottom)
@@ -300,6 +361,27 @@ public class UIManager : MonoBehaviour
 
         _popupCG = go.AddComponent<CanvasGroup>();
         _popupCG.alpha = 0f;
+    }
+
+    private void BuildFeedbackPopup()
+    {
+        var go = NewUIGO("FeedbackPopup", _canvas.transform);
+        _feedbackRT = go.GetComponent<RectTransform>();
+        _feedbackRT.anchorMin = _feedbackRT.anchorMax = new Vector2(0.5f, 0.5f);
+        _feedbackRT.pivot = new Vector2(0.5f, 0.5f);
+        _feedbackRT.sizeDelta = new Vector2(800f, 200f);
+        _feedbackRT.anchoredPosition = Vector2.zero;
+
+        _feedbackTMP = go.AddComponent<TextMeshProUGUI>();
+        // Using a larger font size for feedback
+        ApplyTextStyle(_feedbackTMP, "", 120f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
+        
+        // Extra TMP settings for flair
+        _feedbackTMP.outlineWidth = 0.25f;
+        _feedbackTMP.outlineColor = new Color(0, 0, 0, 0.5f);
+
+        _feedbackCG = go.AddComponent<CanvasGroup>();
+        _feedbackCG.alpha = 0f;
     }
 
     // ── Game-over panel ───────────────────────────────────────────────────────

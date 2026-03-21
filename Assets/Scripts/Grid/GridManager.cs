@@ -29,6 +29,7 @@ public class GridManager : MonoBehaviour
 
     // ── Highlight tracking ─────────────────────────────────────────────────────
     private readonly List<Vector2Int> _highlighted = new List<Vector2Int>();
+    private int _consecutiveClears = 0;
 
     // ── Events ─────────────────────────────────────────────────────────────────
     /// <summary>Fired when lines are cleared. Args: (fullCols, fullRows, cellCount).</summary>
@@ -263,6 +264,22 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+    public void UpdateGridColors(Color bgColor, Color gridBgColor)
+    {
+        if (_bgSR != null) _bgSR.color = gridBgColor;
+
+        // Update empty cell colors to match background color (invisible on BG but visible on GridBG)
+        for (int c = 0; c < Constants.GRID_COLS; c++)
+        {
+            for (int r = 0; r < Constants.GRID_ROWS; r++)
+            {
+                if (!_occupied[c, r])
+                {
+                    _cellSR[c, r].color = Constants.CellEmptyColor;
+                }
+            }
+        }
+    }
 
     // ── Private: build visuals ──────────────────────────────────────────────────
 
@@ -288,8 +305,8 @@ public class GridManager : MonoBehaviour
             _bgSR.sprite = gridBGSprite;
 
             // Sprite'ın orijinal boyutunu al
-            float spriteWidth = gridBGSprite.bounds.size.x - 1.5f;
-            float spriteHeight = gridBGSprite.bounds.size.y - 1.5f;
+            float spriteWidth = gridBGSprite.bounds.size.x - 1.0f;
+            float spriteHeight = gridBGSprite.bounds.size.y - 1.0f;
 
             // Grid boyutlarına göre scale hesapla (en-boy oranını korumadan)
             float scaleX = gridWidth / spriteWidth;
@@ -365,7 +382,14 @@ public class GridManager : MonoBehaviour
             if (full) fullRows.Add(r);
         }
 
-        if (fullCols.Count == 0 && fullRows.Count == 0) { onDone?.Invoke(); return; }
+        if (fullCols.Count == 0 && fullRows.Count == 0)
+        {
+            _consecutiveClears = 0;
+            onDone?.Invoke();
+            return;
+        }
+
+        _consecutiveClears++;
 
         // Collect unique cells to clear
         var toClear = new HashSet<Vector2Int>();
@@ -379,6 +403,30 @@ public class GridManager : MonoBehaviour
         if (lineCount >= 2)
         {
             StyleManager.Instance?.NextStyle();
+        }
+
+        // --- New Feedback Logic ---
+        bool isCombo = _consecutiveClears > 1;
+        AudioManager.Instance?.PlayFeedbackSound(lineCount, isCombo);
+
+        string feedbackText = "";
+        int feedbackType = 0;
+
+        if (isCombo)
+        {
+            feedbackText = "COMBO";
+            feedbackType = 3;
+        }
+        else
+        {
+            if (lineCount == 1) { feedbackText = "GOOD"; feedbackType = 0; }
+            else if (lineCount == 2) { feedbackText = "AMAZING"; feedbackType = 1; }
+            else if (lineCount >= 3) { feedbackText = "UNBELIEVABLE"; feedbackType = 2; }
+        }
+
+        if (!string.IsNullOrEmpty(feedbackText))
+        {
+            UIManager.Instance?.ShowFeedback(feedbackText, feedbackType);
         }
 
         AudioManager.Instance?.PlayLineClear(lineCount);

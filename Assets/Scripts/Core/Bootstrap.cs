@@ -34,6 +34,10 @@ public class Bootstrap : MonoBehaviour
         SetupEventSystem();
 
         // ── Create manager GameObjects ─────────────────────────────────────
+        // StyleManager MUST be created before GridManager & BlockSpawner
+        // so their Awake() can subscribe to OnStyleChanged.
+        var styleMgr    = Spawn<StyleManager>  ("StyleManager");
+        var themeMgr    = Spawn<ColorThemeManager> ("ColorThemeManager");
         var poolMgr     = Spawn<PoolManager>   ("PoolManager");
         var scoreMgr    = Spawn<ScoreManager>  ("ScoreManager");
         var gridMgr     = Spawn<GridManager>   ("GridManager");
@@ -42,7 +46,6 @@ public class Bootstrap : MonoBehaviour
         var input       = Spawn<InputHandler>  ("InputHandler");
         var gameMgr     = Spawn<GameManager>   ("GameManager");
         var effectMgr   = Spawn<EffectManager> ("EffectManager");
-        var styleMgr    = Spawn<StyleManager>  ("StyleManager");
 
         // AudioManager must already exist in the scene with clips assigned via Inspector.
         var audioMgr  = FindAnyObjectByType<AudioManager>();
@@ -68,7 +71,6 @@ public class Bootstrap : MonoBehaviour
         var cam = GameObject.FindObjectOfType<Camera>() ?? gameObject.AddComponent<Camera>();
         cam.orthographic     = true;
         cam.orthographicSize = LayoutConfig.OrthoSize;
-        cam.backgroundColor  = Constants.BgColor;
         cam.clearFlags       = CameraClearFlags.SolidColor;
         cam.tag              = "MainCamera";
         transform.position   = new Vector3(0f, 0f, -10f);
