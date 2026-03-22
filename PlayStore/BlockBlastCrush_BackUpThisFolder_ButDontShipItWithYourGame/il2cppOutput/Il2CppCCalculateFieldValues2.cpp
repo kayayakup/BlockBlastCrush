@@ -36059,6 +36059,7 @@ struct U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields
 {
 	U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B* ___U3CU3E9;
 	Action_1_t61953204BFE962922BA541482E3ECC9BB03FC8EE* ___U3CU3E9__6_0;
+	Action_1_t61953204BFE962922BA541482E3ECC9BB03FC8EE* ___U3CU3E9__7_0;
 };
 struct U3CU3Ec_tFE23038B63E5E9EDD95FF07844C136230AED9FFC_StaticFields
 {
@@ -42081,9 +42082,9 @@ IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7877[14] =
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7878[4] = 
 {
 	static_cast<int32_t>(offsetof(StyleManager_t661B8007F315D90B517B542976F0B859DBE640CD_StaticFields, ___U3CInstanceU3Ek__BackingField)),static_cast<int32_t>(offsetof(StyleManager_t661B8007F315D90B517B542976F0B859DBE640CD, ___OnStyleChanged)),static_cast<int32_t>(offsetof(StyleManager_t661B8007F315D90B517B542976F0B859DBE640CD, ____currentStyleIndex)),0,};
-IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7879[2] = 
+IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7879[3] = 
 {
-	static_cast<int32_t>(offsetof(U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields, ___U3CU3E9)),static_cast<int32_t>(offsetof(U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields, ___U3CU3E9__6_0)),};
+	static_cast<int32_t>(offsetof(U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields, ___U3CU3E9)),static_cast<int32_t>(offsetof(U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields, ___U3CU3E9__6_0)),static_cast<int32_t>(offsetof(U3CU3Ec_tB79E4DA23B422D023060F6C78C10E0C61E4EDA2B_StaticFields, ___U3CU3E9__7_0)),};
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7880[5] = 
 {
 	static_cast<int32_t>(offsetof(GoogleAdMobController_tA67725E06A75AB353EF78F847737BC7624E15704_StaticFields, ___Instance)),static_cast<int32_t>(offsetof(GoogleAdMobController_tA67725E06A75AB353EF78F847737BC7624E15704, ___bannerView)),static_cast<int32_t>(offsetof(GoogleAdMobController_tA67725E06A75AB353EF78F847737BC7624E15704, ___interstitial)),static_cast<int32_t>(offsetof(GoogleAdMobController_tA67725E06A75AB353EF78F847737BC7624E15704, ___bannerID)),static_cast<int32_t>(offsetof(GoogleAdMobController_tA67725E06A75AB353EF78F847737BC7624E15704, ___interstitialID)),};
