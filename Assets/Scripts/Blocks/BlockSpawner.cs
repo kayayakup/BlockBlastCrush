@@ -171,18 +171,36 @@ public class BlockSpawner : MonoBehaviour
     {
         _filledCount = 0;
 
-        // Sample occupancy once for the whole batch so all three pieces
+        // Sample occupancy once for the whole batch so all pieces
         // are chosen with the same difficulty context.
         float occ = GridManager.Instance != null
                     ? GridManager.Instance.GetOccupancyRatio()
                     : 0f;
 
-        // Generate candidates with rarity control
         var candidates = new BlockData[Constants.TRAY_COUNT];
-        for (int i = 0; i < Constants.TRAY_COUNT; i++)
-            candidates[i] = GetRandomWithRarity(occ);
 
-        // Safety pass: if none of the three fit anywhere, replace one with
+        // ── Gap-aware slot ───────────────────────────────────────────────
+        // Pick one random slot that will receive a shape matching a grid gap.
+        int gapSlot = -1;
+        if (occ > 0.10f && GridManager.Instance != null)
+        {
+            var fittingIndices = GridManager.Instance.FindFittingShapeIndices();
+            if (fittingIndices.Count > 0)
+            {
+                gapSlot = Random.Range(0, Constants.TRAY_COUNT);
+                int chosenIdx = fittingIndices[Random.Range(0, fittingIndices.Count)];
+                candidates[gapSlot] = BlockDefinitions.GetFromShapeIndex(chosenIdx);
+            }
+        }
+
+        // ── Fill remaining slots with normal random shapes ───────────────
+        for (int i = 0; i < Constants.TRAY_COUNT; i++)
+        {
+            if (i == gapSlot) continue; // already assigned
+            candidates[i] = GetRandomWithRarity(occ);
+        }
+
+        // Safety pass: if none of the pieces fit anywhere, replace one with
         // a guaranteed-fit piece (avoids deadlocks on very crowded grids).
         if (occ > 0.55f && GridManager.Instance != null)
         {
@@ -192,8 +210,9 @@ public class BlockSpawner : MonoBehaviour
 
             if (!anyFits)
             {
-                // Force the middle slot to a guaranteed-fit tiny piece
-                candidates[1] = BlockDefinitions.GetGuaranteedFit();
+                // Force a slot to a guaranteed-fit tiny piece
+                int safeSlot = (gapSlot >= 0 && gapSlot != 1) ? 1 : 0;
+                candidates[safeSlot] = BlockDefinitions.GetGuaranteedFit();
             }
         }
 

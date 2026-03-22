@@ -177,6 +177,12 @@ public static class BlockDefinitions
         return new BlockData(AllShapes[TinyPool[0]], color);
     }
 
+    /// <summary>Creates a BlockData from a specific shape index with a random colour.</summary>
+    public static BlockData GetFromShapeIndex(int index)
+    {
+        return new BlockData(AllShapes[index], RandomColor());
+    }
+
     private static Color RandomColor() => Palette[Random.Range(0, Palette.Length)];
     private static Vector2Int   V(int c, int r) => new Vector2Int(c, r);
     private static Vector2Int[] S(params Vector2Int[] cells) => cells;

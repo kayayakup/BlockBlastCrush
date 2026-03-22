@@ -123,6 +123,26 @@ public class GridManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Returns indices into BlockDefinitions.AllShapes that can be placed
+    /// somewhere on the current grid. Used by BlockSpawner for gap-aware spawning.
+    /// </summary>
+    public List<int> FindFittingShapeIndices()
+    {
+        var fitting = new List<int>();
+        var shapes = BlockDefinitions.AllShapes;
+        // Dummy colour – CanPlace only checks geometry
+        Color dummyColor = Color.white;
+
+        for (int i = 0; i < shapes.Length; i++)
+        {
+            var data = new BlockData(shapes[i], dummyColor);
+            if (CanPlaceAnywhere(data))
+                fitting.Add(i);
+        }
+        return fitting;
+    }
+
     // ── Placement ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -305,8 +325,8 @@ public class GridManager : MonoBehaviour
             _bgSR.sprite = gridBGSprite;
 
             // Sprite'ın orijinal boyutunu al
-            float spriteWidth = gridBGSprite.bounds.size.x - 1.0f;
-            float spriteHeight = gridBGSprite.bounds.size.y - 1.0f;
+            float spriteWidth = gridBGSprite.bounds.size.x - 1.25f;
+            float spriteHeight = gridBGSprite.bounds.size.y - 1.25f;
 
             // Grid boyutlarına göre scale hesapla (en-boy oranını korumadan)
             float scaleX = gridWidth / spriteWidth;
