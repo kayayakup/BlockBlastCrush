@@ -21,8 +21,6 @@ public class GameManager : MonoBehaviour
     {
         IsGameOver  = false;
         TotalPlaced = 0;
-
-        GoogleAdMobController.Instance.RestartScene();
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
