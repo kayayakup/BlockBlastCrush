@@ -10,8 +10,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public bool IsGameOver   { get; private set; }
-    public int  TotalPlaced  { get; private set; }   // total blocks placed this session
+    public bool IsGameOver { get; private set; }
+    public int TotalPlaced { get; private set; }   // total blocks placed this session
 
     void Awake() => Instance = this;
 
@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     public void Initialize()
     {
-        IsGameOver  = false;
+        IsGameOver = false;
         TotalPlaced = 0;
     }
 
@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     /// <summary>Resets the entire game to its initial state.</summary>
     public void RestartGame()
     {
-        IsGameOver  = false;
+        IsGameOver = false;
         TotalPlaced = 0;
 
         ScoreManager.Instance.ResetScore();
@@ -59,5 +59,10 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.ShowGameOver(ScoreManager.Instance.CurrentScore);
 
         GoogleAdMobController.Instance.ShowInterstitialAd();
+    }
+
+    public void OpenAppStoreURL(string capturedUrl)
+    {
+        Application.OpenURL(capturedUrl);
     }
 }
