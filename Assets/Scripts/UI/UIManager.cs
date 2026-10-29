@@ -38,6 +38,15 @@ public class UIManager : MonoBehaviour
     // Game-over panel
     private GameObject _gameOverPanel;
     private TMP_Text _gameOverScoreTMP;
+    private Button _gameOverRewardedButton;
+    private TMP_Text _gameOverRewardedButtonText;
+    private bool _waitingForGameOverRewardedAd;
+
+    // Optional rewarded-ad offer shown during active play
+    private GameObject _timedRewardedOffer;
+    private Button _timedRewardedOfferButton;
+    private TMP_Text _timedRewardedOfferText;
+    private float _timedRewardedOfferHideTime;
 
     // World-space background
     private GameObject _bgObj;
@@ -59,6 +68,7 @@ public class UIManager : MonoBehaviour
         BuildScorePopup();
         BuildFeedbackPopup();
         BuildGameOverPanel();
+        BuildTimedRewardedOffer();
 
         ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
         RefreshScoreTexts(0, ScoreManager.Instance.BestScore);
@@ -112,9 +122,12 @@ public class UIManager : MonoBehaviour
                .Join(_feedbackRT.DOAnchorPosY(100f, 0.30f));
     }
 
-    public void ShowGameOver(int finalScore)
+    public void ShowGameOver(int finalScore, bool showRewardedContinue)
     {
         _gameOverScoreTMP.text = $"SCORE   {finalScore}\nBEST   {ScoreManager.Instance.BestScore}";
+        _gameOverRewardedButton.gameObject.SetActive(showRewardedContinue);
+        _gameOverRewardedButtonText.text = "WATCH AD TO CONTINUE";
+        _waitingForGameOverRewardedAd = false;
         _gameOverPanel.SetActive(true);
 
         var cg = _gameOverPanel.GetComponent<CanvasGroup>();
@@ -131,6 +144,54 @@ public class UIManager : MonoBehaviour
     public void HideGameOver()
     {
         _gameOverPanel.SetActive(false);
+        _waitingForGameOverRewardedAd = false;
+    }
+
+    public void SetRewardedContinueLoading(bool isLoading)
+    {
+        _waitingForGameOverRewardedAd = isLoading;
+        _gameOverRewardedButtonText.text = isLoading
+            ? "LOADING AD..."
+            : "WATCH AD TO CONTINUE";
+    }
+
+    public void SetRewardedContinueUnavailable()
+    {
+        _waitingForGameOverRewardedAd = false;
+        _gameOverRewardedButtonText.text = "AD NOT READY - TRY AGAIN";
+    }
+
+    public void ShowTimedRewardedOffer(bool isAdReady, bool isLoading)
+    {
+        if (_gameOverPanel.activeSelf)
+            return;
+
+        _timedRewardedOffer.SetActive(true);
+        _timedRewardedOfferHideTime = Time.unscaledTime + 8f;
+        SetTimedRewardedOfferStatus(isAdReady, isLoading);
+    }
+
+    public void SetTimedRewardedOfferStatus(bool isAdReady, bool isLoading)
+    {
+        string status = isAdReady
+            ? "WATCH AD  +25 POINTS"
+            : isLoading
+                ? "LOADING AD..."
+                : "AD NOT READY - TRY AGAIN";
+
+        if (_timedRewardedOfferText.text != status)
+        {
+            _timedRewardedOfferText.text = status;
+            _timedRewardedOfferHideTime = Time.unscaledTime + 8f;
+        }
+
+        _timedRewardedOfferButton.interactable = !isLoading;
+    }
+
+    public void HideTimedRewardedOffer()
+    {
+        if (_timedRewardedOffer != null)
+            _timedRewardedOffer.SetActive(false);
     }
 
     public void UpdateBackgroundColor(Color c)
@@ -268,6 +329,30 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         if (_safeAreaRT != null) ApplySafeArea();
+
+        if (_timedRewardedOffer != null && _timedRewardedOffer.activeSelf)
+        {
+            GoogleAdMobController adMob = GoogleAdMobController.Instance;
+            bool isLoading = adMob != null && adMob.IsRewardedRequestPending();
+            if (adMob != null)
+                SetTimedRewardedOfferStatus(adMob.IsRewardedReady(), isLoading);
+
+            if (!isLoading && Time.unscaledTime >= _timedRewardedOfferHideTime)
+                HideTimedRewardedOffer();
+        }
+
+        if (_waitingForGameOverRewardedAd &&
+            GoogleAdMobController.Instance != null)
+        {
+            GoogleAdMobController adMob = GoogleAdMobController.Instance;
+            if (adMob.IsRewardedReady())
+                SetRewardedContinueLoading(false);
+            else if (!adMob.IsRewardedRequestPending())
+            {
+                _waitingForGameOverRewardedAd = false;
+                _gameOverRewardedButtonText.text = "AD NOT READY - TRY AGAIN";
+            }
+        }
     }
 
     // ── Top bar (crown + best + gear + score) ─────────────────────────────────
@@ -406,7 +491,7 @@ public class UIManager : MonoBehaviour
         var cardRT = cardGO.GetComponent<RectTransform>();
         cardRT.anchorMin = cardRT.anchorMax = new Vector2(0.5f, 0.5f);
         cardRT.pivot = new Vector2(0.5f, 0.5f);
-        cardRT.sizeDelta = new Vector2(560f, 420f);
+        cardRT.sizeDelta = new Vector2(560f, 520f);
         cardRT.anchoredPosition = Vector2.zero;
 
         var cardImg = cardGO.AddComponent<Image>();
@@ -429,11 +514,38 @@ public class UIManager : MonoBehaviour
         var fRT = fGO.GetComponent<RectTransform>();
         fRT.anchorMin = fRT.anchorMax = new Vector2(0.5f, 0.5f);
         fRT.pivot = new Vector2(0.5f, 0.5f);
-        fRT.anchoredPosition = new Vector2(0f, 20f);
+        fRT.anchoredPosition = new Vector2(0f, 70f);
         fRT.sizeDelta = new Vector2(480f, 100f);
         _gameOverScoreTMP = fGO.AddComponent<TextMeshProUGUI>();
         ApplyTextStyle(_gameOverScoreTMP, "SCORE   0\nBEST   0", 36f,
             new Color(0.8f, 0.9f, 1f), FontStyles.Normal, TextAlignmentOptions.Center);
+
+        var adButtonGO = NewUIGO("RewardedContinueBtn", cardGO.transform);
+        var adButtonRT = adButtonGO.GetComponent<RectTransform>();
+        adButtonRT.anchorMin = adButtonRT.anchorMax = new Vector2(0.5f, 0f);
+        adButtonRT.pivot = new Vector2(0.5f, 0f);
+        adButtonRT.anchoredPosition = new Vector2(0f, 130f);
+        adButtonRT.sizeDelta = new Vector2(420f, 64f);
+
+        var adButtonImg = adButtonGO.AddComponent<Image>();
+        adButtonImg.sprite = TextureUtils.CreateRoundedRect(100, 100, 22, Color.white);
+        adButtonImg.color = new Color(0.95f, 0.62f, 0.12f);
+        adButtonImg.type = Image.Type.Sliced;
+
+        _gameOverRewardedButton = adButtonGO.AddComponent<Button>();
+        _gameOverRewardedButton.targetGraphic = adButtonImg;
+        _gameOverRewardedButton.onClick.AddListener(
+            () => GameManager.Instance.WatchRewardedToContinue());
+
+        var adButtonTextGO = NewUIGO("BtnText", adButtonGO.transform);
+        var adButtonTextRT = adButtonTextGO.GetComponent<RectTransform>();
+        adButtonTextRT.anchorMin = Vector2.zero;
+        adButtonTextRT.anchorMax = Vector2.one;
+        adButtonTextRT.offsetMin = adButtonTextRT.offsetMax = Vector2.zero;
+        _gameOverRewardedButtonText = adButtonTextGO.AddComponent<TextMeshProUGUI>();
+        _gameOverRewardedButtonText.raycastTarget = false;
+        ApplyTextStyle(_gameOverRewardedButtonText, "WATCH AD TO CONTINUE", 25f,
+            Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
         // Restart button
         var btnGO = NewUIGO("RestartBtn", cardGO.transform);
@@ -462,9 +574,42 @@ public class UIManager : MonoBehaviour
         btnTxtRT.anchorMax = Vector2.one;
         btnTxtRT.offsetMin = btnTxtRT.offsetMax = Vector2.zero;
         var btnTMP = btnTxtGO.AddComponent<TextMeshProUGUI>();
+        btnTMP.raycastTarget = false;
         ApplyTextStyle(btnTMP, "PLAY AGAIN", 36f, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
         _gameOverPanel.SetActive(false);
+    }
+
+    private void BuildTimedRewardedOffer()
+    {
+        _timedRewardedOffer = NewUIGO("TimedRewardedOffer", _safeAreaRT);
+        var rt = _timedRewardedOffer.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -270f);
+        rt.sizeDelta = new Vector2(430f, 72f);
+
+        var image = _timedRewardedOffer.AddComponent<Image>();
+        image.sprite = TextureUtils.CreateRoundedRect(100, 100, 22, Color.white);
+        image.color = new Color(0.12f, 0.55f, 0.30f, 0.96f);
+        image.type = Image.Type.Sliced;
+
+        _timedRewardedOfferButton = _timedRewardedOffer.AddComponent<Button>();
+        _timedRewardedOfferButton.targetGraphic = image;
+        _timedRewardedOfferButton.onClick.AddListener(
+            () => GameManager.Instance.WatchRewardedForBonus());
+
+        var textGO = NewUIGO("BtnText", _timedRewardedOffer.transform);
+        var textRT = textGO.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = textRT.offsetMax = Vector2.zero;
+        _timedRewardedOfferText = textGO.AddComponent<TextMeshProUGUI>();
+        _timedRewardedOfferText.raycastTarget = false;
+        ApplyTextStyle(_timedRewardedOfferText, "WATCH AD  +25 POINTS", 25f,
+            Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
+
+        _timedRewardedOffer.SetActive(false);
     }
 
     // ── Utility ───────────────────────────────────────────────────────────────

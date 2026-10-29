@@ -231,8 +231,6 @@ public class BlockSpawner : MonoBehaviour
                 if (capturedI == 0) AudioManager.Instance?.PlaySpawn();
             });
         }
-
-        GoogleAdMobController.Instance.CheckAndShowBanner();
     }
 
     private void RefreshTray()
